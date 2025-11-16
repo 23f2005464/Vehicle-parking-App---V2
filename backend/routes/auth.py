@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify,current_app
 from flask_login import login_user
 from db import db
 from flask_security import auth_required , roles_required, current_user
-from flask_security.utils import hash_password
+from flask_security.utils import hash_password,logout_user
 from werkzeug.security import check_password_hash,generate_password_hash
 auth_bp = Blueprint('auth', __name__,url_prefix='/api/auth')
 
@@ -12,9 +12,13 @@ auth_bp = Blueprint('auth', __name__,url_prefix='/api/auth')
 @roles_required('admin')
 def admin_home():
     print("you are in admin route")
-    return {"message": "Welcome to the admin dashboard!"}, 200
+    admin=current_user
+    return {
+        "email":admin.email,
+        "id":admin.id,   
+    }
 
-
+   
 
 @auth_bp.route('/user',methods=['GET'])
 @auth_required('token') 
@@ -70,18 +74,20 @@ def login():
     print(data)
     email=data['email']
     password=data['password']
-
+    
     if not email or not password:
         return jsonify({"message":"Email and password are required"}),400
     
     user = current_app.security.datastore.find_user(email=email)
+    roles = [r.name for r in user.roles]
     if user :
         if check_password_hash(user.password,password):
             login_user(user)
             return jsonify({
                 "id":user.id,
                 "email":user.email,
-                "token":user.get_auth_token()
+                "token":user.get_auth_token(),
+                 "roles": roles, 
 
             })
         else :
@@ -89,3 +95,17 @@ def login():
     else :
         return jsonify({"message":"User not found"}),404   
     
+@auth_bp.route('/logout', methods=['POST'])
+@auth_required('token')
+def logout_user():
+    try:
+        # Revoke the current user's token
+     
+
+        # Explicitly logout (Flask-Security utility)
+        logout_user()
+
+        return jsonify({"message": "Logout successful"}), 200
+    except Exception as e:
+        print("Logout error:", e)
+        return jsonify({"error": "Logout failed"}), 500

@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify,current_app
 from db import db
 from flask_security import auth_required , roles_required, current_user
 from sqlalchemy import func
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,timezone
 from sqlalchemy.exc import SQLAlchemyError
 user_bp= Blueprint('user', __name__,url_prefix='/api/user')
 
@@ -31,6 +31,7 @@ def user_profile():
 def update_profile_admin():
     user_data=request.get_json()
     user=current_user
+    print(user_data)
     if 'fullname' in user_data:
         user.fullname=user_data['fullname']
     if 'address' in user_data:    
@@ -301,4 +302,77 @@ def paying_transaction():
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
 
+@user_bp.route('/user_summary', methods=['GET'])
+@auth_required('token')
+@roles_required('user')
+def user_summary():
+    print("log :: user summary initialized")
+    user_id = current_user.id
+
+    def HrsFunc(hrs):
+        if hrs < 1:
+            return 1
+        elif hrs == int(hrs):
+            return int(hrs)
+        else:
+            return int(hrs) + 1
+
+    def dr(start_time, end_time):
+        start_time = start_time.replace(tzinfo=timezone.utc)
+        end_time = end_time.replace(tzinfo=timezone.utc)
+        hour = (end_time - start_time).total_seconds() / 3600
+        return HrsFunc(hour)
+
+    # main query (keep your preferred join format)
+    reservations = (
+        Reserve_parking_spot.query
+        .join(Parking_spot)
+        .join(Parking_lots)
+        .filter(
+            Reserve_parking_spot.user_id == user_id,
+            Reserve_parking_spot.end_parking_timestamp == None
+        )
+        .all()
+    )
+
+    current_timestamp = datetime.now(timezone.utc)
+    summary = []
+    count_loc = {}
+    aggregated_durations = {}
+
+    for res in reservations:
+        parking_lot = res.parking_spot.parking_lot
+        parking_spot = res.parking_spot
+
+        start_time = res.parking_timestamp
+        duration_hours = dr(start_time=start_time, end_time=current_timestamp)
+
+        prime_loc = parking_lot.prime_location
+
+        # Count how many active spots per location
+        count_loc[prime_loc] = count_loc.get(prime_loc, 0) + 1
+
+        # Sum total duration per location
+        aggregated_durations[prime_loc] = aggregated_durations.get(prime_loc, 0) + duration_hours
+
+        summary.append({
+            "spot_id": parking_spot.id,
+            "lot_id": parking_lot.id,
+            "prime_location": prime_loc,
+            "duration_hours": duration_hours
+        })
+
+    # convert aggregated_durations to list for bar chart
+    data = [
+        {"prime_location": loc, "total_duration": total}
+        for loc, total in aggregated_durations.items()
+    ]
+
+    response = {
+        "data": data,
+        "count_loc": count_loc,
+        "user_data": {"user_id": user_id}
+    }
+
+    return jsonify(response), 200
 

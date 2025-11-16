@@ -7,6 +7,19 @@ from flask_security import Security, SQLAlchemyUserDatastore
 from flask_security.utils import hash_password
 from routes import auth_bp,user_bp,admin_bp
 from werkzeug.security import check_password_hash,generate_password_hash
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+import sqlite3
+
+
+
+@event.listens_for(Engine, "connect")
+def sqlite_foreign_keys(dbapi_connection, connection_record):
+    if isinstance(dbapi_connection, sqlite3.Connection):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON;")
+        cursor.close()
+
 
 #forgot_password function is remaining
 

@@ -42,10 +42,8 @@ class Parking_lots(db.Model):
     # One-to-many relationship with Parking_spot
     parking_spots = db.relationship(
         'Parking_spot',
-        backref='parking_lot',
-        lazy='dynamic',
-        cascade="all, delete-orphan",
-        passive_deletes=True
+         backref=db.backref('parking_lot', passive_deletes=True),
+         cascade="all, delete-orphan",
     )
 
 
