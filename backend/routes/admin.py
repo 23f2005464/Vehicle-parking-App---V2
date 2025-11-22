@@ -9,8 +9,9 @@ admin_bp= Blueprint('admin', __name__,url_prefix='/api/admin')
 def get_ist_now(time):
         parking_t= time + timedelta(hours=5, minutes=30)
         
-        parking_t = parking_t.replace(tzinfo=None, microsecond=0)  # Remove timezone & microseconds
-        return parking_t.strftime("%d/%m/%Y %H:%M:%S")   
+        parking_t = parking_t.replace(tzinfo=None, microsecond=0)            #Remove timezone & microseconds
+        return parking_t.strftime("%d/%m/%Y %H:%M:%S")
+
 
 
 @admin_bp.route('/update_profile',methods=['PUT'])

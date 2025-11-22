@@ -82,7 +82,6 @@ def login():
     roles = [r.name for r in user.roles]
     if user :
         if check_password_hash(user.password,password):
-            login_user(user)
             return jsonify({
                 "id":user.id,
                 "email":user.email,
@@ -95,17 +94,3 @@ def login():
     else :
         return jsonify({"message":"User not found"}),404   
     
-@auth_bp.route('/logout', methods=['POST'])
-@auth_required('token')
-def logout_user():
-    try:
-        # Revoke the current user's token
-     
-
-        # Explicitly logout (Flask-Security utility)
-        logout_user()
-
-        return jsonify({"message": "Logout successful"}), 200
-    except Exception as e:
-        print("Logout error:", e)
-        return jsonify({"error": "Logout failed"}), 500

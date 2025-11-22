@@ -199,16 +199,6 @@ def cancel_reservation():
         return jsonify({"error": str(e)}), 500
 
 
-#     "message": "Spot reserved successfully",
-#     "reservation_details": {
-#         "lot_id": 2,
-#         "parking_timestamp": "Mon, 10 Nov 2025 18:20:34 GMT",
-#         "reservation_id": 4,
-#         "spot_id": 104,
-#         "vehicle_number": "54a654a"
-#     }
-# }
-
     
 
 
