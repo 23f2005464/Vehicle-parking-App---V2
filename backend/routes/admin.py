@@ -1,9 +1,10 @@
+import re
 from flask import Blueprint, request, jsonify,current_app
 from flask_security import auth_required , roles_required, current_user
 from db import db
 from models import Parking_lots, Parking_spot, Reserve_parking_spot, User
 from sqlalchemy import func
-from datetime import timedelta
+from datetime import timedelta,datetime
 admin_bp= Blueprint('admin', __name__,url_prefix='/api/admin')
 
 def get_ist_now(time):
@@ -123,6 +124,83 @@ def view_spot():
     reserve=Reserve_parking_spot.query.join(User,Reserve_parking_spot.user_id==User.id).filter(Reserve_parking_spot.spot_id ==spot_id).first()
     return jsonify({"user_id":reserve.user_id,"name":reserve.user.fullname,"email":reserve.user.email,"parking_timestamp":get_ist_now(reserve.parking_timestamp),"vehicle_number":reserve.vehicle_number})
    
+   
+@admin_bp.route('/search/view_user_res_info', methods=['POST'])
+@auth_required('token')
+@roles_required('admin')
+def view_user_res_info():
+
+    # ------- same helper functions from your pay_now ----------
+    def paying_hrs(hrs):
+        paying_hrs = 0
+        if hrs < 1:
+            paying_hrs = 1
+        elif hrs == int(hrs):
+            paying_hrs = int(hrs)
+        else:
+            paying_hrs = int(hrs) + 1
+        return paying_hrs
+
+    def dr(start_time, end_time):
+        hour = (end_time - start_time).total_seconds() / 3600
+        nearest_int = paying_hrs(hour)
+        return nearest_int
+
+    def get_ist_now(time):
+        parking_t = time + timedelta(hours=5, minutes=30)
+        return parking_t.replace(tzinfo=None).replace(microsecond=0)
+    # -----------------------------------------------------------
+
+    req = request.get_json()
+    user_id = req.get("user_id")
+    if not user_id:
+        return jsonify({"message": "user_id required"}), 400
+
+    # fetch all reservations for this user
+    reservations = Reserve_parking_spot.query.join(
+        User, Reserve_parking_spot.user_id == User.id
+    ).join(
+        Parking_spot, Reserve_parking_spot.spot_id == Parking_spot.id
+    ).join(
+        Parking_lots, Parking_spot.lot_id == Parking_lots.id
+    ).filter(
+        Reserve_parking_spot.user_id == user_id
+    ).all()
+
+    if not reservations:
+        return jsonify({"message": "No reservations found for this user"}), 404
+
+    result = []
+    current_time = datetime.utcnow()
+
+    for reserve in reservations:
+        parking_time = reserve.parking_timestamp
+        duration = dr(parking_time, current_time)
+
+        price = reserve.parking_spot.parking_lot.price_per_hour_of_spot
+        amount = duration * int(price)
+
+        result.append({
+            "reservation_id": reserve.id,
+            "user_id": reserve.user_id,
+            "name": reserve.user.fullname,
+            "email": reserve.user.email,
+            "vehicle_number": reserve.vehicle_number,
+            "spot_id": reserve.spot_id,
+            "lot_id": reserve.parking_spot.lot_id,
+
+            # time formatting as in pay_now
+            "parking_start": get_ist_now(parking_time),
+            "parking_end": get_ist_now(current_time),
+
+            # duration + amount exactly like pay_now
+            "duration": duration,
+            "amount": amount
+        })
+
+    return jsonify(result), 200
+
+      
 @admin_bp.route('/edit_lot', methods=['POST'])
 @auth_required('token')
 @roles_required('admin')
@@ -211,6 +289,9 @@ def view_lots():
     return jsonify(result),200
 
 
+
+
+
 @admin_bp.route('/view_lot',methods=['POST'])
 @auth_required('token')
 @roles_required('admin')
@@ -235,6 +316,195 @@ def view_lot():
         "price_per_hour_of_spot":lot.price_per_hour_of_spot
         }),200       
     
+
+
+@admin_bp.route('/search/lot',methods=['POST'])
+@auth_required('token')
+@roles_required('admin')
+def search_lot():
+    admin_id=current_user
+    print(admin_id,"view accessed")
+    lot_id=request.get_json().get('lot_id')
+    pincode=request.get_json().get('pincode')
+    prime_location=request.get_json().get('prime_location')
+    lot_json=[]
+    print(admin_id)
+    if not lot_id and not pincode and not prime_location:
+      return jsonify({"message": "lot_id or pincode or location is required"}), 400
+
+    if lot_id:
+         lot=Parking_lots.query.filter_by(id=lot_id,admin_id=admin_id.id).first()
+         if not lot:
+           return jsonify({"message":"No lot found for this lot_id"}),404
+         lot_json.append({
+        "lot_id":lot.id,
+        "prime_location":lot.prime_location,
+        "address":lot.address,
+        "pincode":lot.pincode,
+        "available_spots":lot.available_spots,
+        "total_spaces":lot.max_no_of_spots,
+        "price_per_hour_of_spot":lot.price_per_hour_of_spot
+        })
+         
+    elif pincode:
+        
+        lot=Parking_lots.query.filter_by(pincode=pincode,admin_id=admin_id.id).all()
+        if not lot:
+           return jsonify({"message":"No lot found for this pincode"}),404
+     
+        for l in lot:
+                lot_json.append({
+                "lot_id":l.id,
+                "prime_location":l.prime_location,
+                "address":l.address,
+                "pincode":l.pincode,
+                "available_spots":l.available_spots,
+                "total_spaces":l.max_no_of_spots,
+                "price_per_hour_of_spot":l.price_per_hour_of_spot
+                })
+    elif prime_location:
+        print(prime_location)
+        lot=Parking_lots.query.filter(Parking_lots.prime_location.ilike(f"%{prime_location}%"),Parking_lots.admin_id==admin_id.id).all()
+        print(lot)
+        if not lot:
+           return jsonify({"message":"No lot found for this prime_location"}),404
+     
+        for l in lot:
+                lot_json.append({
+                "lot_id":l.id,
+                "prime_location":l.prime_location,
+                "address":l.address,
+                "pincode":l.pincode,
+                "available_spots":l.available_spots,
+                "total_spaces":l.max_no_of_spots,
+                "price_per_hour_of_spot":l.price_per_hour_of_spot
+                })        
+    print(lot_json)
+    return jsonify(lot_json),200       
+
+
+
+
+
+@admin_bp.route('/search/spot',methods=['POST'])
+@auth_required('token')
+@roles_required('admin')    
+def search_spot():
+    spot_id=request.get_json().get('spot_id')
+    lot_id=request.get_json().get('lot_id')
+    if not spot_id and not lot_id:
+      return jsonify({"message": "spot_id or lot_id is required"}), 400
+    spot_json=[]
+    if spot_id:
+            spot=Parking_spot.query.join(Parking_lots).filter(Parking_spot.id==spot_id,Parking_lots.admin_id==current_user.id).first()
+            print(spot)
+            if not spot:
+                return jsonify({"message":"No spot found for this spot_id"}),404
+            spot_json.append({
+            "spot_id":spot.id,
+            "status":spot.status,
+            "lot_id":spot.lot_id
+            })
+    elif lot_id:
+            spots=Parking_spot.query.join(Parking_lots).filter(Parking_spot.lot_id==lot_id,Parking_lots.admin_id==current_user.id).all()
+            if not spots:
+                return jsonify({"message":"No spots found for this lot_id"}),404
+            for spot in spots:
+                spot_json.append({
+                "spot_id":spot.id,
+                "status":spot.status,
+                "lot_id":spot.lot_id
+                })       
+    return jsonify(spot_json),200
+
+# @admin_bp.route('/reservation_info',methods=['POST'])
+# @auth_required('token')
+# @roles_required('admin')
+# def reservation_info():
+#     email=request.get_json().get('email')
+#     if not email:
+#         return jsonify({"message":"email is required"}),400
+#     print(reservations)
+   
+
+@admin_bp.route('/search/user',methods=['POST'])
+@auth_required('token')
+@roles_required('admin')    
+def search_user():
+    user_id=request.get_json().get('user_id')
+    email=request.get_json().get('email')
+    fullname=request.get_json().get('name')
+    print(fullname)
+    if not email and not fullname and not user_id:
+      return jsonify({"message": "email or fullname is required"}), 400
+    user_json=[]
+    if email:
+            results=(db.session.query(User, func.count(Reserve_parking_spot.id).label("reservation_count")
+                                      .outerjoin(Reserve_parking_spot,Reserve_parking_spot.user_id==User.id)
+                                      .filter(User.email==email).group_by(User.id).all()))
+            if not results:
+                return jsonify({"message":"No user found for this email"}),404
+            for user,reservations in results:
+                if user.id==current_user.id:
+                     return jsonify({"message":"This is your id"}),404
+                user_json.append({
+                "user_id":user.id,
+                "fullname":user.fullname,
+                "email":user.email,
+                "address":user.address,
+                "pincode":user.pincode,
+                "reservations": reservations
+                })
+    elif fullname:
+            results = (
+            db.session.query(
+                User,
+                func.count(Reserve_parking_spot.id).label("reservation_count") )
+                .outerjoin(Reserve_parking_spot, Reserve_parking_spot.user_id == User.id)
+                .filter(User.fullname.ilike(f"%{fullname}%"))
+                .group_by(User.id)
+                .all()
+    )
+
+            if not results:
+                return jsonify({"message":"No users found for this fullname"}),404
+            for user,reservations in results:
+                if user.id==current_user.id:
+                     return jsonify({"message":"This is your id"}),404
+                user_json.append({
+                "user_id":user.id,
+                "fullname":user.fullname,
+                "email":user.email,
+                "address":user.address,
+                "pincode":user.pincode,
+                 "reservations": reservations
+                })       
+    elif user_id:
+            results = (
+            db.session.query(
+                User,
+                func.count(Reserve_parking_spot.id).label("reservation_count") )
+                .outerjoin(Reserve_parking_spot, Reserve_parking_spot.user_id == User.id)
+                .filter(User.id==user_id)
+                .group_by(User.id)
+                .all()
+    )
+
+            for user,reservations in results:
+                if user.id==current_user.id:
+                     return jsonify({"message":"This is your id"}),404
+                else:
+                    user_json.append({
+                    "user_id":user.id,
+                    "fullname":user.fullname,
+                    "email":user.email,
+                    "address":user.address,
+                    "pincode":user.pincode,
+                    'reservations':reservations
+                    })           
+    return jsonify(user_json),200
+
+
 @admin_bp.route('/delete_spot',methods=['DELETE'])
 @auth_required('token')
 @roles_required('admin')
@@ -284,3 +554,21 @@ def delete_lot(lot_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500    
+    
+@admin_bp.route('/view_users',methods=['GET'])
+def view_users():
+    users=User.query.all()
+    
+    users_json=[]
+    if users is None:
+        return jsonify({"message":"No users found"}),404
+    else:
+        for user in users:
+             users_json.append({
+             "user_id":user.id,
+             "fullname":user.fullname,
+             "email":user.email,
+             "address":user.address,
+             "pincode":user.pincode
+        })
+        return jsonify(users_json),200
