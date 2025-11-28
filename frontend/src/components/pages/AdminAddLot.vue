@@ -23,7 +23,7 @@ export default {
         Add_lot() {
             if (this.loading) return;
             this.loading = true;
-            fetch('http://localhost:5000/api/admin/create_lot', {
+            fetch('http://127.0.0.1:5000/api/admin/create_lot', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

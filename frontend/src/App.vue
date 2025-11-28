@@ -14,7 +14,6 @@ export default {
   },
 
   setup() {
-    // Composition API inside Options API — useRoute() must stay here
     const route = useRoute()
     return { route }
   }

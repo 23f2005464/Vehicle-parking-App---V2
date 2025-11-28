@@ -10,7 +10,6 @@
             userdata: '',
             userhistory: '',
             searchResults: [],
-            searchNotHide: false,
             query: '',
             search_error: '',
           }
@@ -50,7 +49,7 @@
         mounted() {
           const token = localStorage.getItem('auth_token');
 
-          const userFetch = fetch("http://localhost:5000/api/auth/user", {
+          const userFetch = fetch("http://127.0.0.1:5000/api/auth/user", {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -58,7 +57,7 @@
             }
           }).then(res => res.json());
 
-          const historyFetch = fetch("http://localhost:5000/api/user/my_reservations", {
+          const historyFetch = fetch("http://127.0.0.1:5000/api/user/my_reservations", {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -71,7 +70,7 @@
               this.userdata = userData;
               this.userhistory = historyData;
 
-              return fetch("http://localhost:5000/api/user/searching_lots", {
+              return fetch("http://127.0.0.1:5000/api/user/searching_lots", {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -87,11 +86,9 @@
               if (status === 404 || body.message) {
                 this.search_error = body.message || "No results found.";
                 this.searchResults = [];
-                this.searchNotHide = false;
               } else {
                 this.searchResults = body;
                 this.search_error = '';
-                this.searchNotHide = true;
               }
             })
             .catch(err => {
@@ -119,9 +116,9 @@
           <div v-if="search_error" class="alert alert-warning mt-3">
             {{ search_error }}
           </div>
-          <div v-if="searchNotHide">
-            <div class="row searchres-container mt-5">
-              <div class="col-md-4 mb-4" v-for="(lot, index) in searchResults" :key="index">
+          
+            <div class="container card-container">
+              <div  v-for="(lot, index) in searchResults" :key="index">
                 <div class="card" style="width: 18rem;">
                   <div class="card-body search-card">
                     <h5 class="card-title">
@@ -146,18 +143,17 @@
                 </div>
               </div>
             </div>
-          </div>
+          
           <h2 class="mt-4">History</h2>
-          <div class="row history-con">
+          <div class="history-con">
 
-            <div class="col-md-4 mb-4" v-for="(item, index) in userhistory" :key="index">
-              <div class="card" style="width: 18rem;">
+            <div v-for="(item, index) in userhistory" :key="index">
+              <div class="card" style="width: 18rem;height: 289.6px;">
                 <div class="card-body">
-                  <h5 class="card-title">{{ item.prime_location }} (Id-{{ item.reservation_id }})</h5>
+                  <h5 class="card-title">{{ item.prime_location }} (Res.Id-{{ item.reservation_id }})</h5>
+                   <h6 class="card-subtitle mb-2 text-body-secondary">Lot Id: {{ item.lot_id }} </h6>
                   <h6 class="card-subtitle mb-2 text-body-secondary">Address: {{ item.address }} </h6>
                   <h6 class="card-subtitle mb-2 text-body-secondary">Vehicle: {{ item.vehicle_number }}</h6>
-                  <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s
-                    content.</p> -->
                   <h6 class="card-subtitle mb-2 text-body-secondary">Spot: {{ item.lot_id }} -{{ item.spot_id }} </h6>
                   <h6 class="card-subtitle mb-2 text-body-secondary">Parked on : {{ item.parking_timestamp }}</h6>
 
@@ -196,55 +192,46 @@
 
 .history-con {
   min-height: 200px;
-  /* minimum visible area */
   max-height: 500px;
-  /* maximum height limit */
   overflow-y: scroll;
-  /* enable vertical scrolling */
   overflow-x: hidden;
-  /* prevent horizontal scroll */
   margin-top: 20px;
   padding-right: 10px;
-  /* avoids scrollbar overlap */
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  flex-direction: row;
+  justify-content: space-evenly;
   scrollbar-width: none;
+  gap:0.5rem;
+
 }
 
-
-.row {
-  margin-left: 35px;
-  /* adds your left margin */
-  max-height: 600px;
-  /* optional: gives it height */
-  display: flex;
-  /* ensure flex layout */
-  flex-wrap: wrap;
-  /* allows wrapping to next line */
-  /* adds spacing between cards */
-  justify-content: flex-start;
-}
-
-.searchres-container {
-  min-height: 100px;
-}
 
 .card-container {
   display: flex;
+  flex-direction:row ;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 0.5rem;
   justify-content: center;
+  margin-top: 20px;
+  max-height: 600px;
+  min-height: 600px;
+  overflow-y: scroll;
+  background-color: #edf2fb;
+  padding: 2rem;
+  border-radius: 20px;
+  scrollbar-width: none;
 }
-
 .card {
   flex: 1 1 300px;
+  max-width: 350px;
+  min-width: 280px;
+  min-height: 270px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 270px;
-  /* adjust for consistent height */
 }
+
 
 .card-body {
   display: flex;

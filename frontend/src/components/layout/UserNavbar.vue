@@ -87,6 +87,8 @@ export default {
     border: solid 0px #161d26;
     border-radius: 40px;
     margin-top: 1rem;
+    box-shadow: 0px 3px 10px rgba(11, 112, 92, 0.1);
+
 }
 
 .container-fluid {
@@ -107,7 +109,11 @@ export default {
     font-size: larger;
     margin-left: 1.5rem;
 }
-
+.nav-item .nav-link:hover {
+   font-weight: bolder;
+    transition: 0.5s;
+    color: rgb(0, 0, 0);
+}
 .navbar-nav {
     font-size: large;
     font-weight: 500;

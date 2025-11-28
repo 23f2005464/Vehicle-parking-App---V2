@@ -1,10 +1,10 @@
-import re
 from flask import Blueprint, request, jsonify,current_app
 from flask_security import auth_required , roles_required, current_user
 from db import db
 from models import Parking_lots, Parking_spot, Reserve_parking_spot, User
 from sqlalchemy import func
-from datetime import timedelta,datetime
+from datetime import timedelta,datetime,date
+from cache_config import cache
 admin_bp= Blueprint('admin', __name__,url_prefix='/api/admin')
 
 def get_ist_now(time):
@@ -79,7 +79,8 @@ def create_lot():
         
         db.session.bulk_save_objects(spot_insert)
         db.session.commit()
-
+      
+        cache.delete("view_lots")
         return jsonify({
             "message": "Parking lot created successfully"
         }), 201
@@ -90,9 +91,10 @@ def create_lot():
 
 @admin_bp.route('/view_spots',methods=['POST'])
 @auth_required('token') 
-@roles_required('admin')    
+@roles_required('admin')
 def view_spots():
     lot_id=request.get_json().get('lot_id')
+    print("view spots accessed")
     if not lot_id:
         return jsonify({"message":"lot_id is required"}),400
     lot=Parking_lots.query.filter_by(id=lot_id,admin_id=current_user.id).first()
@@ -128,6 +130,7 @@ def view_spot():
 @admin_bp.route('/search/view_user_res_info', methods=['POST'])
 @auth_required('token')
 @roles_required('admin')
+@cache.memoize(timeout=30)
 def view_user_res_info():
 
     # ------- same helper functions from your pay_now ----------
@@ -220,8 +223,8 @@ def edit_lot():
         lot.address = lot_data['address']
     if 'pincode' in lot_data:
         lot.pincode = lot_data['pincode']
-    if 'price_per_hour' in lot_data:
-        lot.price_per_hour_of_spot = float(lot_data['price_per_hour'])
+    if 'price_per_hour_of_spot' in lot_data:
+        lot.price_per_hour_of_spot = float(lot_data['price_per_hour_of_spot'])
 
     try:
         if 'total_spaces' in lot_data:
@@ -242,7 +245,9 @@ def edit_lot():
 
             lot.max_no_of_spots = lot_data['total_spaces']
 
+        lot.available_spots = Parking_spot.query.filter_by(lot_id=lot.id, status='A').count()
         db.session.commit()
+        cache.delete("view_lots")
 
         return jsonify({
             "message": "Parking lot updated successfully",
@@ -264,6 +269,7 @@ def edit_lot():
 @admin_bp.route('/view_lots',methods=['POST'])
 @auth_required('token')
 @roles_required('admin')
+@cache.cached(timeout=120,key_prefix="view_lots")
 def view_lots():
     admin_id=request.get_json().get('admin_id')
     print(admin_id)
@@ -388,7 +394,7 @@ def search_lot():
 
 @admin_bp.route('/search/spot',methods=['POST'])
 @auth_required('token')
-@roles_required('admin')    
+@roles_required('admin')  
 def search_spot():
     spot_id=request.get_json().get('spot_id')
     lot_id=request.get_json().get('lot_id')
@@ -429,7 +435,8 @@ def search_spot():
 
 @admin_bp.route('/search/user',methods=['POST'])
 @auth_required('token')
-@roles_required('admin')    
+@roles_required('admin') 
+@cache.memoize(timeout=120)   
 def search_user():
     user_id=request.get_json().get('user_id')
     email=request.get_json().get('email')
@@ -531,6 +538,7 @@ def delete_spot():
         lot.available_spots=updated_available_spot
         lot.max_no_of_spots -= 1
         db.session.commit()
+        cache.delete("view_lots")
         return jsonify({"message":"Spot deleted successfully"}),200
     except Exception as e:
         db.session.rollback()
@@ -547,6 +555,9 @@ def delete_lot(lot_id):
     lot=Parking_lots.query.filter_by(id=lot_id,admin_id=current_user.id).first()
     if not lot:
         return jsonify({"message":"No lot found for this admin with given lot_id"}),404
+    is_occupied=lot.max_no_of_spots - lot.available_spots
+    if is_occupied >0:
+        return jsonify({"message":"Cannot delete lot with occupied spots"}),400
     try:
         db.session.delete(lot)
         db.session.commit()
@@ -556,6 +567,8 @@ def delete_lot(lot_id):
         return jsonify({"error": str(e)}), 500    
     
 @admin_bp.route('/view_users',methods=['GET'])
+@auth_required('token')
+@roles_required('admin')
 def view_users():
     users=User.query.all()
     
@@ -564,11 +577,114 @@ def view_users():
         return jsonify({"message":"No users found"}),404
     else:
         for user in users:
+             if user.id==current_user.id:
+                continue
              users_json.append({
              "user_id":user.id,
              "fullname":user.fullname,
              "email":user.email,
              "address":user.address,
-             "pincode":user.pincode
+             "pincode":user.pincode,
+             "active": user.is_active  
         })
         return jsonify(users_json),200
+    
+    
+@admin_bp.route('/ban_user', methods=['POST'])
+@auth_required('token')
+@roles_required('admin')
+def ban_user():
+    data = request.get_json()
+    user_id = data.get("user_id")
+
+    user = User.query.filter_by(id=user_id).first()
+
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    user.active = False
+    db.session.commit()
+
+    return jsonify({"message": "User banned successfully"}), 200   
+
+@admin_bp.route('/unban_user', methods=['POST'])
+@auth_required('token')     
+@roles_required('admin')
+def unban_user():
+    data = request.get_json()
+    user_id = data.get("user_id")
+
+    user = User.query.filter_by(id=user_id).first()
+
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+
+    user.active = True
+    db.session.commit()
+
+    return jsonify({"message": "User unbanned successfully"}), 200 
+
+
+
+@admin_bp.route('/summary', methods=['GET'])
+@auth_required('token')
+@roles_required('admin')
+@cache.cached(timeout=30)
+def summary():
+    admin_id = current_user.id
+
+    # ---------------------------------------
+    # admin's lots
+    # ---------------------------------------
+    lots = Parking_lots.query.filter_by(admin_id=admin_id).all()
+    total_lots = len(lots)
+
+    # ---------------------------------------
+    # Calculating spots and gathering lot_ids
+    # ---------------------------------------
+    total_spots = 0
+    total_available_spots = 0
+    lot_ids = []
+
+    for lot in lots:
+        total_spots += lot.max_no_of_spots
+        print(f"avail.spots {lot.available_spots}")
+        total_available_spots += lot.available_spots
+        lot_ids.append(lot.id)
+    print(total_available_spots,"total avail spots")
+    # ---------------------------------------
+    # Reservations Count
+    # ---------------------------------------
+    total_reservations = Reserve_parking_spot.query.join(Parking_spot).filter(
+    Parking_spot.lot_id.in_(lot_ids),  Reserve_parking_spot.end_parking_timestamp.is_(None)
+).count()
+    # ---------------------------------------
+    # Today's revenue
+    # ---------------------------------------
+    today = date.today()
+
+    today_reservations = Reserve_parking_spot.query.join(Parking_spot).filter(
+    Parking_spot.lot_id.in_(lot_ids),
+    db.func.date(Reserve_parking_spot.parking_timestamp) == today,
+  
+).all()
+
+    print(today_reservations,"today res")
+    revenue_today = sum(res.total_amount_user_paid for res in today_reservations)
+    print(revenue_today,"revenue today")
+    # ---------------------------------------
+    # Banned Users
+    # ---------------------------------------
+    banned_users = User.query.filter_by(active=False).count()
+
+    # ---------------------------------------
+    # Return Summary
+    # ---------------------------------------
+    return jsonify({
+        "total_lots": total_lots,
+        "total_spots": total_spots,
+        "total_available_spots": total_available_spots,
+        "total_reservations": total_reservations,
+        "banned_users": banned_users,
+        "revenue_today": revenue_today
+    }), 200

@@ -1,7 +1,8 @@
 <template>
-    <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger','text-center'] " role="alert">
-  {{ message }}
-</div>
+    <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger', 'text-center']"
+        role="alert">
+        {{ message }}
+    </div>
 
     <div>
         <!-- Active Spots Chart -->
@@ -25,7 +26,6 @@
 <script>
 import { Chart } from "chart.js/auto";
 
-
 export default {
     name: "SummaryPage",
 
@@ -36,10 +36,11 @@ export default {
             countLoc: {},
         };
     },
+
     mounted() {
         const token = localStorage.getItem("auth_token");
 
-        fetch("http://localhost:5000/api/user/user_summary", {
+        fetch("http://127.0.0.1:5000/api/user/user_summary", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -48,7 +49,6 @@ export default {
         })
             .then((response) => response.json())
             .then((result) => {
-                console.log(result);
                 this.data = result.data || [];
                 this.countLoc = result.count_loc || {};
                 this.userData = result.user_data || {};
@@ -62,27 +62,59 @@ export default {
                 console.error("Error loading summary:", error);
             });
     },
+
     methods: {
+        /** Utility to generate random colors for each bar */
+        generateColors(length) {
+            const colors = [];
+            for (let i = 0; i < length; i++) {
+                const r = Math.floor(Math.random() * 255);
+                const g = Math.floor(Math.random() * 255);
+                const b = Math.floor(Math.random() * 255);
+                colors.push(`rgba(${r}, ${g}, ${b}, 0.8)`);
+            }
+            return colors;
+        },
+
+        /** Animation delay per bar for smooth effect */
+        barAnimationDelay(context) {
+            let delay = 0;
+            if (context.type === "data" && context.mode === "default") {
+                delay = context.dataIndex * 150; // 150ms stagger animation
+            }
+            return delay;
+        },
+
         renderSpotsChart() {
             if (!Object.keys(this.countLoc).length) return;
 
+            const labels = Object.keys(this.countLoc);
+            const values = Object.values(this.countLoc);
+
             const ctx = document.getElementById("SpotsChart").getContext("2d");
-            ctx.width = 1000;
+
             new Chart(ctx, {
                 type: "bar",
                 data: {
-                    labels: Object.keys(this.countLoc),
+                    labels,
                     datasets: [
                         {
                             label: "Active Spots Count",
-                            data: Object.values(this.countLoc),
-                            backgroundColor: ["#228B22"],
+                            data: values,
+                            backgroundColor: this.generateColors(values.length),
+                            borderColor: "#000",
+                            borderWidth: 1,
                             barThickness: 60,
                         },
                     ],
                 },
                 options: {
                     responsive: true,
+                    animation: {
+                        duration: 1200,
+                        easing: "easeInOutQuart",
+                        delay: (context) => this.barAnimationDelay(context),
+                    },
                     plugins: { legend: { position: "top" } },
                     scales: { y: { beginAtZero: true } },
                 },
@@ -92,12 +124,11 @@ export default {
         renderDurationChart() {
             if (!this.data.length) return;
 
-            const ctx2 = document.getElementById("durationChart2").getContext("2d");
-            ctx2.width = 1000;
             const labels = this.data.map((item) => item.prime_location);
             const durations = this.data.map((item) => item.total_duration);
-            console.log("Chart Labels:", labels);
-            console.log("durations", durations);
+
+            const ctx2 = document.getElementById("durationChart2").getContext("2d");
+
             new Chart(ctx2, {
                 type: "bar",
                 data: {
@@ -106,8 +137,8 @@ export default {
                         {
                             label: "Total Duration Per Location",
                             data: durations,
-                            backgroundColor: "rgba(153, 102, 255, 0.6)",
-                            borderColor: "rgba(153, 102, 255, 1)",
+                            backgroundColor: this.generateColors(durations.length),
+                            borderColor: "#000",
                             borderWidth: 1,
                             barThickness: 60,
                         },
@@ -116,6 +147,11 @@ export default {
                 options: {
                     responsive: true,
                     indexAxis: "y",
+                    animation: {
+                        duration: 1200,
+                        easing: "easeInOutQuart",
+                        delay: (context) => this.barAnimationDelay(context),
+                    },
                     plugins: {
                         legend: { position: "bottom" },
                         tooltip: {
@@ -124,15 +160,15 @@ export default {
                                     const item = this.data[context.dataIndex];
                                     return `Location: ${item.prime_location}\nDuration: ${item.total_duration} hrs`;
                                 },
-          },
-        },
-      },
-                        scales: {
-                            x: { beginAtZero: true },
-                            y: { ticks: { autoSkip: false } },
+                            },
                         },
                     },
-                });
+                    scales: {
+                        x: { beginAtZero: true },
+                        y: { ticks: { autoSkip: false } },
+                    },
+                },
+            });
         },
     },
 };
@@ -140,12 +176,8 @@ export default {
 
 <style scoped>
 .room-container {
-    width: 50%;
-    height: 100%;
-    display: flex;
-    margin-top: 4rem;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
+    width: 100%;
+    max-width: 900px;
+    margin: 4rem auto;
 }
 </style>

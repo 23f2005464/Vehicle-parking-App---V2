@@ -1,11 +1,14 @@
-import re
+
 from models import Parking_lots, Parking_spot, Reserve_parking_spot
 from flask import Blueprint, request, jsonify,current_app 
 from db import db
 from flask_security import auth_required , roles_required, current_user
 from sqlalchemy import func
-from datetime import datetime,timedelta,timezone
+from datetime import date, datetime,timedelta,timezone
 from sqlalchemy.exc import SQLAlchemyError
+from cache_config import cache 
+
+
 user_bp= Blueprint('user', __name__,url_prefix='/api/user')
 
 def get_ist_now(time):
@@ -13,17 +16,7 @@ def get_ist_now(time):
     return parking_t.replace(tzinfo=None).replace(microsecond=0)
 
 
-@user_bp.route('/profile',methods=['GET'])
-@auth_required('token')
-def user_profile():
-    user=current_user
-    return jsonify({
-        "user_id":user.id,
-        "email":user.email,
-        "fullname":user.fullname,   
-        "address":user.address,
-        "pincode":user.pincode
-    }),200
+
 
 @user_bp.route('/update_profile',methods=['PUT'])
 @auth_required('token')
@@ -140,6 +133,7 @@ def issuing_spot():
     try:
         db.session.add(issue_spot_data)
         db.session.commit()
+        cache.delete("view_lots")#-------------------------------------------------------------------------------------------------------------
         return jsonify({
             "message": "Spot reserved successfully",
             "reservation_details": {
@@ -200,6 +194,7 @@ def cancel_reservation():
 
 
     
+
 
 
 @user_bp.route('pay_now',methods=['GET','POST'])
@@ -274,12 +269,14 @@ def paying_transaction():
     
    
     res=Reserve_parking_spot.query.filter_by(id=res_id).first()
-   
+    #db updates
     res.total_amount_user_paid=total_amount_user_paid
     res.end_parking_timestamp=end_parking_timestamp
     res.duration=duration
+    spot=Parking_spot.query.filter_by(id=res.spot_id).first()
+    spot.status='A' 
     db.session.commit()
-    
+    cache.delete("view_lots")#-------------------------------------------------------------------------------------------------------------  
     return jsonify({"message":"successfully paid"}),200
   
   except SQLAlchemyError as e:

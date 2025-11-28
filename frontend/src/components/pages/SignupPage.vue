@@ -17,7 +17,7 @@ export default {
             return
         }
         console.log("User is :",this.email,this.fullname)
-        fetch('http://localhost:5000/api/auth/register',{
+        fetch('http://127.0.0.1:5000/api/auth/register',{
             method : 'POST',
             headers :  {
           'Content-Type': 'application/json'

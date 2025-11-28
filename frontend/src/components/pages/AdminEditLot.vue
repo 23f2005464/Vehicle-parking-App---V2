@@ -26,7 +26,7 @@ export default {
         View_lot() {
             const lot_id = this.$route.params.lot_id;
 
-            fetch("http://localhost:5000/api/admin/view_lot", {
+            fetch("http://127.0.0.1:5000/api/admin/view_lot", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -59,7 +59,7 @@ export default {
             // Always include lot_id
             editedData.lot_id = this.FormData.lot_id;
 
-            fetch("http://localhost:5000/api/admin/edit_lot", {
+            fetch("http://127.0.0.1:5000/api/admin/edit_lot", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -147,9 +147,9 @@ export default {
         </div>
 
         <div class="btn-group-custom">
-            <Button label="Save" @click="Edit_lot" radius="10px" padding="15px 25px" fs="20px" />
+            <Button label="Save" @click="Edit_lot" radius="10px" padding="15px 25px" fs="20px" height="60px"/>
             <router-link to="/admin/dashboard">
-                <Button label="Cancel" radius="10px" padding="15px 25px" fs="20px" />
+                <Button label="Cancel" radius="10px" padding="15px 25px" fs="20px" height="60px" />
             </router-link>
         </div>
     </div>

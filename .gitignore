@@ -1,0 +1,7 @@
+.vscode
+templates
+__pycache__
+backend/__pycache__
+frontend/node_modules
+instance
+./backend/venv

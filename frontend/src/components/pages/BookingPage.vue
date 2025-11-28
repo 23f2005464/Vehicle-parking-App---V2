@@ -18,7 +18,7 @@ export default {
     const lot_id = this.$route.params.lot_id;
 
     // Fetch preview info for available spot
-    fetch('http://localhost:5000/api/user/issuing_spot/preview', {
+    fetch('http://127.0.0.1:5000/api/user/issuing_spot/preview', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export default {
         return;
       }
 
-      fetch('http://localhost:5000/api/user/issuing_spot', {
+      fetch('http://127.0.0.1:5000/api/user/issuing_spot', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export default {
     <div class="payment-container">
       <h1 class="page-title">Book Your Parking Spot</h1>
 
-      <div v-if="bookingData.spot_id">
+      <div v-if="bookingData.spot_id>=0">
         <div class="mb-3 row">
           <label class="col-sm-4 label-text">Lot ID:</label>
           <div class="col-sm-8">

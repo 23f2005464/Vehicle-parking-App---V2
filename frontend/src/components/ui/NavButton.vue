@@ -27,6 +27,10 @@ defineProps({
     type:String,
     default:'15px'
   },
+  height:{
+    type:String,
+    default:'40px'}
+  
  
 })
 </script>
@@ -35,7 +39,7 @@ defineProps({
 <template>
     <div class="nav-button">
         <button type="button" class="btn btn-primary btn-lg" :style="{ 'border-radius': radius,
-      'background-color': bgcolor, 'width': width,'padding':padding,'font-size':fs,
+      'background-color': bgcolor, 'width': width,'padding':padding,'font-size':fs,'height':height,
       '--hover-color': hoverColor}">{{ label }}</button>
     </div>
     

@@ -14,7 +14,7 @@ export default {
   },
   methods: {
     Payfunction() {
-      fetch("http://localhost:5000/api/user/paying_transaction", {
+      fetch("http://127.0.0.1:5000/api/user/paying_transaction", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,7 +49,7 @@ export default {
     }
   },
   mounted() {
-    fetch("http://localhost:5000/api/user/pay_now", {
+    fetch("http://127.0.0.1:5000/api/user/pay_now", {
       method: 'POST',
 
       headers: {

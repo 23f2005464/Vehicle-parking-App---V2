@@ -8,6 +8,12 @@ export default {
         Button
     },
     user: '',
+    methods:{
+        logout() {
+             localStorage.removeItem("auth_token");
+             this.$router.push("/login");
+        }
+    },
 }
 </script>
 
@@ -37,23 +43,23 @@ export default {
                         <router-link to="/admin/search" class="nav-link">Search</router-link>
                     </li>
                       <li class="nav-item">
-                        <router-link to="/admin/users" class="nav-link">Users</router-link>
+                        <router-link to="/admin/userdata" class="nav-link">Users</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link to="/adminr/summary" class="nav-link">Summary</router-link>
+                        <router-link to="/admin/summary" class="nav-link">Summary</router-link>
                     </li>
                     
 
                     <li class="nav-item">
-                        <router-link to="/logout" class="nav-link">Logout</router-link>
+                        <a @click.prevent="logout" class="nav-link">Logout</a>
                     </li>
                 </ul>
 
             </div>
             <div class="nav-Button">
 
-                <router-link to="/login"><img src="@/assets/profileicon.png" width="40px" height="40px"
-                        style="margin-right: -30px; "></router-link>
+                <router-link to="/admin/edit_profile"><img src="@/assets/profileicon.png" width="40px" height="40px"
+                        style="margin-right: -10px; "></router-link>
             </div>
         </div>
     </nav>
@@ -69,6 +75,7 @@ export default {
     border: solid 0px #161d26;
     border-radius: 40px;
     margin-top: 1rem;
+    box-shadow: 0px 3px 10px rgba(11, 112, 92, 0.1);
 
 }
 
@@ -98,6 +105,11 @@ export default {
     color: #161d26;
     justify-items: flex-start;
     gap: 5rem;
+}
+.nav-item .nav-link:hover {
+   font-weight: bolder;
+    transition: 0.5s;
+    color: rgb(0, 0, 0);
 }
 
 .cus-nav {

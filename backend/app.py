@@ -10,7 +10,7 @@ from werkzeug.security import check_password_hash,generate_password_hash
 from sqlalchemy import event
 from sqlalchemy.engine import Engine
 import sqlite3
-
+from cache_config import cache 
 
 
 @event.listens_for(Engine, "connect")
@@ -28,6 +28,11 @@ def app_init():
     app.config.from_object(Localconfig)
     CORS(app)
     db.init_app(app)
+    
+    #------------Cache init----------------------------
+    cache.init_app(app) 
+    
+    
     datastore = SQLAlchemyUserDatastore(db, User, Role)
     security = Security(app, datastore)
     app.security = security

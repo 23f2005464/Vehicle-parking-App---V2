@@ -8,10 +8,16 @@ import ProfilePage from '@/components/pages/ProfilePage.vue'
 import PaymentPage from '@/components/pages/PaymentPage.vue'
 import SummaryPage from '@/components/pages/SummaryPage.vue'
 import AdminAddLot from '@/components/pages/AdminAddLot.vue'
+import SearchPage from '@/components/pages/SearchPage.vue'
 import AdminEditLot from '@/components/pages/AdminEditLot.vue'
 import AdminSpotsPage from '@/components/pages/AdminSpotsPage.vue'
+import UserDataPage from '@/components/pages/UserDataPage.vue'
+import AdminEditProfile from '@/components/pages/AdminEditProfile.vue'
+import AdminSummaryPage from '@/components/pages/AdminSummaryPage.vue'
+
 import { createRouter, createWebHistory } from 'vue-router'
 import { compile } from 'vue'
+
 
 
 
@@ -76,6 +82,26 @@ const routes=[
     component:AdminSpotsPage,
     name:"AdminSpotsPage"
   },
+  {
+    path:'/admin/search',
+    component:SearchPage,
+    name:"SearchPage"
+  },
+  {
+    path:'/admin/userdata',
+    component:UserDataPage,
+    name:"UserDataPage"
+  },
+  {
+    path:'/admin/summary',
+    component:AdminSummaryPage,
+    name:"AdminSummaryPage"
+  },
+  {
+    path:'/admin/edit_profile',
+    component:AdminEditProfile,
+    name:"AdminEditProfile"
+  }
 
 ] 
 

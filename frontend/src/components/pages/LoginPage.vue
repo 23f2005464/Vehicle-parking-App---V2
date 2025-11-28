@@ -22,7 +22,7 @@ export default {
         return;
       }
       console.log("Logging in with", this.FormData.email, this.FormData.password)
-      fetch('http://localhost:5000/api/auth/login', {
+      fetch('http://127.0.0.1:5000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -83,19 +83,19 @@ export default {
 
       <div class="mb-3 text-start">
         <label for="email" class="form-label">Email address</label>
-        <input type="text" class="form-control" id="email" placeholder="Enter email" v-model="FormData.email" />
+        <input type="text" class="form-control" id="email" placeholder="Enter email" v-model="FormData.email"  @keyup.enter="loginuser" />
       </div>
 
       <div class="mb-3 text-start">
         <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" placeholder="Password" v-model="FormData.password" />
+        <input type="password" class="form-control" id="password" placeholder="Password" v-model="FormData.password"  @keyup.enter="loginuser"  />
       </div>
 
       <div class="d-flex justify-content-between align-items-center mb-3">
         <a href="#">Forgot password?</a>
       </div>
 
-      <button @click="loginuser" class="btn btn-primary w-100">Login</button>
+      <button @click="loginuser"tabindex="0" class="btn btn-primary w-100">Login</button>
 
       <p class="mt-3">
         Don't have an account?

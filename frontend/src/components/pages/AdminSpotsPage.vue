@@ -13,8 +13,8 @@ export default {
             message: '',
             messageType: '',
             lot_id: '',
-            user_data:[],
-            showUserPopup:false
+            user_data: [],
+            showUserPopup: false
         }
     },
     methods: {
@@ -31,8 +31,9 @@ export default {
         },
         DelSpot(spot_id) {
             if (!confirm(`Are you sure you want to delete spot ${spot_id}?`)) {
-                return;   // <-- THIS stops deletion when Cancel is clicked
-            } fetch("http://localhost:5000/api/admin/delete_spot", {
+                return;   
+            } 
+            fetch("http://127.0.0.1:5000/api/admin/delete_spot", {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,25 +66,25 @@ export default {
                 })
 
         },
-        Userdata(spot_id){
-        fetch("http://localhost:5000/api/admin/view_spot",{
-              method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Token-Auth': localStorage.getItem('auth_token')
-            },
-            body: JSON.stringify({
-                "spot_id": spot_id
+        Userdata(spot_id) {
+            fetch("http://127.0.0.1:5000/api/admin/view_spot", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Token-Auth': localStorage.getItem('auth_token')
+                },
+                body: JSON.stringify({
+                    "spot_id": spot_id
+                })
             })
-        })
-        .then(res=>res.json())
-        .then(data=>{this.user_data=data;this.showUserPopup = true; })
-    }
+                .then(res => res.json())
+                .then(data => { this.user_data = data; this.showUserPopup = true; })
+        }
     },
 
     mounted() {
         this.lot_id = this.$route.params.lot_id
-        fetch(`http://localhost:5000/api/admin/view_spots`, {
+        fetch(`http://127.0.0.1:5000/api/admin/view_spots`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -114,17 +115,15 @@ export default {
 
         <div class="con" v-for="(spot, index) in data_spots.spots" :key="spot.spot_id">
 
-            <div class="small-square" :class="{
-                redSpot: spot.status === 'R', selected: SelectedSpot === spot.spot_id
-            }" @click="SelectSpot(spot.spot_id)">
+            <div class="small-square" :class="{redSpot: spot.status === 'R', selected: SelectedSpot === spot.spot_id}" @click="SelectSpot(spot.spot_id)">
                 <span v-if="ShowDel === true && SelectedSpot === spot.spot_id">
                     <img src="@\assets\delete.png" class="del-icon" @click="DelSpot(spot.spot_id)">
                 </span>
 
-                <h1 v-if="  !(SelectedSpot===spot.spot_id)" >{{ index + 1 }}</h1>
+                <h1 v-if="!(SelectedSpot === spot.spot_id)">{{ index + 1 }}</h1>
 
-                <div v-if="spot.status === 'R' && SelectedSpot===spot.spot_id ">
-                        <img src="@/assets/image.png" width="40px" @click="Userdata(spot.spot_id)">
+                <div v-if="spot.status === 'R' && SelectedSpot === spot.spot_id">
+                    <img src="@/assets/image.png" width="40px" @click="Userdata(spot.spot_id)">
                 </div>
             </div>
             <h6 style="margin-top: 15px;">#spot id: <b>{{ spot.spot_id }}</b></h6>
@@ -132,18 +131,18 @@ export default {
     </div>
     <div v-if="showUserPopup" class="popup-overlay" @click.self="showUserPopup = false">
 
-    <div class="popup-card">
-        <h2 class="popup-title">Reserved By</h2>
+        <div class="popup-card">
+            <h2 class="popup-title">Reserved By</h2>
 
-        <p><b>Name:</b> {{ user_data.name }}</p>
-        <p><b>Email:</b> {{ user_data.email }}</p>
-        <p><b>Vehicle No:</b> {{ user_data.vehicle_number }}</p>
-        <p><b>Parking Time:</b> {{ user_data.parking_timestamp }}</p>
+            <p><b>Name:</b> {{ user_data.name }}</p>
+            <p><b>Email:</b> {{ user_data.email }}</p>
+            <p><b>Vehicle No:</b> {{ user_data.vehicle_number }}</p>
+            <p><b>Parking Time:</b> {{ user_data.parking_timestamp }}</p>
 
-        <button class="close-btn" @click="showUserPopup = false">Close</button>
+            <button class="close-btn" @click="showUserPopup = false">Close</button>
+        </div>
+
     </div>
-
-</div>
 
 </template>
 
@@ -159,12 +158,12 @@ export default {
     row-gap: 20px;
     align-content: flex-start;
     justify-content: center;
-   
+
 
 }
 
 .container::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 /* When spot.status = "R" */
@@ -237,8 +236,10 @@ export default {
     left: 0;
     width: 100%;
     height: 100%;
-    backdrop-filter: blur(5px);      /* ★ BLUR EFFECT */
-    background: rgba(0, 0, 0, 0.4);  /* slight dark */
+    backdrop-filter: blur(5px);
+    /* ★ BLUR EFFECT */
+    background: rgba(0, 0, 0, 0.4);
+    /* slight dark */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -251,11 +252,12 @@ export default {
     background: white;
     padding: 25px;
     border-radius: 15px;
-    box-shadow: 0 8px 22px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
     animation: popupFade 0.3s ease-out;
 }
-.popup-card:hover{
-    box-shadow:0px 10px 20px rgba(24, 221, 239, 0.5);
+
+.popup-card:hover {
+    box-shadow: 0px 10px 20px rgba(24, 221, 239, 0.5);
     opacity: 30px;
 }
 
@@ -264,11 +266,13 @@ export default {
     text-align: center;
     font-weight: 700;
 }
+
 @keyframes popupFade {
     from {
         transform: translateY(-50px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -289,5 +293,4 @@ export default {
 .close-btn:hover {
     background: #e60000;
 }
-
 </style>

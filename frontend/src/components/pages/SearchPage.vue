@@ -1,5 +1,23 @@
 <script>
 import Button from '@/components/ui/NavButton.vue'
+
+const SEARCH_MAP = {
+    "Parking Lots": {
+        "pincode": { url: "http://127.0.0.1:5000/api/admin/search/lot", key: "pincode" },
+        "lot id": { url: "http://127.0.0.1:5000/api/admin/search/lot", key: "lot_id" },
+        "name": { url: "http://127.0.0.1:5000/api/admin/search/lot", key: "prime_location" }
+    },
+    "Parking Spots": {
+        "spot id": { url: "http://127.0.0.1:5000/api/admin/search/spot", key: "spot_id" },
+        "lot id": { url: "http://127.0.0.1:5000/api/admin/search/spot", key: "lot_id" }
+    },
+    "User": {
+        "user id": { url: "http://127.0.0.1:5000/api/admin/search/user", key: "user_id" },
+        "user name": { url: "http://127.0.0.1:5000/api/admin/search/user", key: "name" },
+        "email": { url: "http://127.0.0.1:5000/api/admin/search/user", key: "email" },
+    }
+};
+
 export default {
     name: "SearchPage",
     components: {
@@ -15,368 +33,118 @@ export default {
             SearchedResultflag: false,
             message: '',
             messageType: '',
-            Popup: false
+            Popup: false,
+
         }
     },
     methods: {
         formatTime(timeString) {
             const d = new Date(timeString);
-
-            // Convert to IST manually
             const ist = new Date(d.getTime() + (5.5 * 60 * 60 * 1000));
 
             return ist.toISOString().slice(0, 19).replace("T", " ");
         },
-    storeSelection() {
-        if (this.selectedOption === 'User') {
-            this.selectedOptiontype = 'user id';
+        
+        storeSelection() {
+            if (this.selectedOption === 'User') {
+                this.selectedOptiontype = 'user id';
+            }
+            else if (this.selectedOption === 'Parking Spots') {
+                this.selectedOptiontype = 'spot id';
+            }
+            else {
+                this.selectedOptiontype = 'pincode';
+            }
+        },
+        api(url, payload) {
+            return fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Token-Auth": localStorage.getItem("auth_token")
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json().then(data => ({ status: res.status, data: data })));
         }
-        else if (this.selectedOption === 'Parking Spots') {
-            this.selectedOptiontype = 'spot id';
+        ,
+        handleApiResult(result) {
+            if (result.status === 404) {
+                this.message = result.data.message || "No results found.";
+                this.messageType = "error";
+                this.SearchedResult = [];
+                this.SearchedResultflag = false;
+
+                setTimeout(() => {
+                    this.message = "";
+                }, 2000);
+
+                return false;
+            }
+
+            return true;
+        },
+
+        storeTypeSelection() { },
+        handleSearch() {
+
+            if (this.selectedOptiontype === "pincode" && this.query.length < 6) {
+                this.message = "Please enter valid pincode";
+                this.messageType = "error";
+                setTimeout(() => { this.message = ""; }, 2000);
+                return;
+            }
+
+            const config = SEARCH_MAP[this.selectedOption][this.selectedOptiontype];
+
+            if (!config) return;
+
+            const payload = {
+                [config.key]: this.query
+            };
+
+            this.api(config.url, payload)
+                .then(result => {
+
+                    if (!this.handleApiResult(result)) return; //if return 404 stop further execution
+
+                    this.SearchedResult = result.data;
+                    this.SearchedResultflag = true;
+                });
         }
-        else {
-            this.selectedOptiontype = 'pincode';
+        ,
+        ReservationInfo(user_id) {
+            fetch("http://127.0.0.1:5000/api/admin/search/view_user_res_info", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Token-Auth': localStorage.getItem('auth_token')
+                },
+                body: JSON.stringify({
+                    "user_id": user_id
+                })
+
+            })
+                .then(res => res.json().then(data => ({ status: res.status, data: data })))
+
+                .then(result => {
+                    if (result.status === 404) {
+                        this.message = result.data.message || "No reservation found.";
+                        this.messageType = "error";
+                        setTimeout(() => {
+                            this.message = '';
+                        }, 2000);
+                        return;
+                    }
+                    this.Popup = true;
+                    this.InfoUserResult = result.data;
+                    this.SearchedResultflag = true;
+
+                    console.log(this.SearchedResult);
+                })
+
         }
-    },
-    storeTypeSelection() { },
-    handleSearch() {
-        if (this.query.length < 6 && this.selectedOptiontype === 'pincode') {
-            this.message = "Please enter valid pincode";
-            this.messageType = "error";
-            setTimeout(() => {
-                this.message = '';
-            }, 2000);
-            return;
-        }
-        if (this.selectedOption === 'Parking Lots' && this.selectedOptiontype === 'pincode') {
-            fetch("http://localhost:5000/api/admin/search/lot", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "pincode": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-                    this.SearchedResult = result.data;
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-
-        };
-        if (this.selectedOption === 'Parking Lots' && this.selectedOptiontype === 'lot id') {
-            fetch("http://localhost:5000/api/admin/search/lot", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "lot_id": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-
-                    this.SearchedResult = result.data;
-
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-
-        };
-        if (this.selectedOption === 'Parking Lots' && this.selectedOptiontype === 'name') {
-            fetch("http://localhost:5000/api/admin/search/lot", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "prime_location": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-                    this.SearchedResult = result.data;
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-
-        };
-        if (this.selectedOption === 'Parking Spots' && this.selectedOptiontype === 'lot id') {
-            fetch("http://localhost:5000/api/admin/search/spot", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "lot_id": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-                    this.SearchedResult = result.data;
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-
-        };
-        if (this.selectedOption === 'Parking Spots' && this.selectedOptiontype === 'spot id') {
-            fetch("http://localhost:5000/api/admin/search/spot", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "spot_id": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-                    this.SearchedResult = result.data;
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-
-        };
-        if (
-            this.selectedOption === 'User' && this.selectedOptiontype === 'user id'
-        ) {
-
-            fetch("http://localhost:5000/api/admin/search/user", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "user_id": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-                    this.SearchedResult = result.data;
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-        };
-        if( this.selectedOption === 'User' && this.selectedOptiontype === 'email'
-        ) {
-            fetch("http://localhost:5000/api/admin/search/user", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "name": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-                    this.SearchedResult = result.data;
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-        };
-        if(this.selectedOption === 'User' && this.selectedOptiontype === 'email' ){
-            fetch("http://localhost:5000/api/admin/search/user", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "email": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-                    this.SearchedResult = result.data;
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-        };
-        if (
-            this.selectedOption === 'User' && this.selectedOptiontype === 'user name'
-        ) {
-
-            fetch("http://localhost:5000/api/admin/search/user", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Token-Auth': localStorage.getItem('auth_token')
-                },
-                body: JSON.stringify({
-                    "name": this.query
-                })
-
-            })
-                .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-                .then(result => {
-                    if (result.status === 404) {
-                        this.message = result.data.message || "No results found.";
-                        this.messageType = "error";
-                        this.SearchedResultflag = false;
-                        this.SearchedResult = [];
-                        setTimeout(() => {
-                            this.message = '';
-                        }, 2000);
-                        return;
-                    }
-                    this.SearchedResult = result.data;
-                    this.SearchedResultflag = true;
-
-                    console.log(this.SearchedResult);
-                })
-        };
-
-
-
-    },
-    ReservationInfo(user_id) {
-        fetch("http://localhost:5000/api/admin/search/view_user_res_info", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Token-Auth': localStorage.getItem('auth_token')
-            },
-            body: JSON.stringify({
-                "user_id": user_id
-            })
-
-        })
-            .then(res => res.json().then(data => ({ status: res.status, data: data })))
-
-            .then(result => {
-                if (result.status === 404) {
-                    this.message = result.data.message || "No reservation found.";
-                    this.messageType = "error";
-                    setTimeout(() => {
-                        this.message = '';
-                    }, 2000);
-                    return;
-                }
-                this.Popup = true;
-                this.InfoUserResult = result.data;
-                this.SearchedResultflag = true;
-
-                console.log(this.SearchedResult);
-            })
-
     }
-}
 
 };
 
@@ -417,20 +185,21 @@ export default {
                 <option value="name">Prime Location</option>
                 <option value="lot id">Lot Id</option>
             </select>
-            <div v-if="selectedOption==='Parking Lots' && selectedOptiontype==='pincode'" class="d-flex justify-content-center mt-3">
+            <div v-if="selectedOption === 'Parking Lots' && selectedOptiontype === 'pincode'"
+                class="d-flex justify-content-center mt-3">
                 <input v-model="query" class="form-control me-2 mt-3 custom-input" type="text"
                     :placeholder="selectedOptiontype" maxlength="6" />
                 <Button label="Search" class="mt-3 " radius="10px" height="53px" @click="handleSearch()" />
             </div>
-            
-           
-            <div  v-else class="d-flex justify-content-center mt-3">
+
+
+            <div v-else class="d-flex justify-content-center mt-3">
                 <input v-model="query" class="form-control me-2 mt-3 custom-input" type="text"
-                    :placeholder="selectedOptiontype"  />
+                    :placeholder="selectedOptiontype" />
                 <Button label="Search" class="mt-3 " radius="10px" height="53px" @click="handleSearch()" />
             </div>
-            
-            
+
+
             <div class="container d-flex   mt-4" v-if="selectedOption === 'Parking Lots'">
                 <div v-if="SearchedResultflag" v-for="(lot, index) in SearchedResult" :key="index" class="card mt-4">
                     <h5><b>{{ lot.prime_location }}</b>
@@ -458,11 +227,10 @@ export default {
                     <h6><b>Spot ID: {{ spot.spot_id }}</b>
                     </h6>
                     <p><b>Lot id:</b> {{ spot.lot_id }}</p>
-                    <p><b>Status:</b>
+                    <p><b>Status:</b></p>
 
-                    <div :class="{ redspot: spot.status === 'R', greenspot: spot.status !== 'R' }">{{ spot.status === 'R'
-                        ?'Reserved' : 'Available' }}</div>
-                    </p>
+                    <span :class="{ redspot: spot.status === 'R', greenspot: spot.status !== 'R' }">{{ spot.status ==='R'?'Reserved' : 'Available' }}</span>
+                    
                 </div>
 
             </div>

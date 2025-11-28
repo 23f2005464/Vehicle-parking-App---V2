@@ -4,8 +4,22 @@ from db import db
 from flask_security import auth_required , roles_required, current_user
 from flask_security.utils import hash_password,logout_user
 from werkzeug.security import check_password_hash,generate_password_hash
+from cache_config import cache
 auth_bp = Blueprint('auth', __name__,url_prefix='/api/auth')
 
+
+
+@auth_bp.route('/profile',methods=['GET'])
+@auth_required('token')
+def user_profile():
+    user=current_user
+    return jsonify({
+        "user_id":user.id,
+        "email":user.email,
+        "fullname":user.fullname,   
+        "address":user.address,
+        "pincode":user.pincode
+    }),200
 
 @auth_bp.route('/admin',methods=['GET','POST'])
 @auth_required('token')
@@ -79,18 +93,22 @@ def login():
         return jsonify({"message":"Email and password are required"}),400
     
     user = current_app.security.datastore.find_user(email=email)
-    roles = [r.name for r in user.roles]
-    if user :
-        if check_password_hash(user.password,password):
+   
+    if not user:
+        return jsonify({"message": "User not found"}), 404
+    
+    if user.active is False:
+        return jsonify({"message": "You banned by User"}), 403
+    
+    if check_password_hash(user.password,password):
+            roles = [r.name for r in user.roles]
             return jsonify({
                 "id":user.id,
                 "email":user.email,
                 "token":user.get_auth_token(),
                  "roles": roles, 
-
-            })
-        else :
-            return jsonify({"message":"Invalid password"}),400
-    else :
-        return jsonify({"message":"User not found"}),404   
+            }),200
+    
+    return jsonify({"message":"Invalid password"}),400
+     
     

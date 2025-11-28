@@ -44,7 +44,7 @@ export default {
         },
 
         saveProfile() {
-            fetch("http://127.0.0.1:5000/api/user/update_profile", {
+            fetch("http://127.0.0.1:5000/api/admin/update_profile", {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export default {
                     this.userData.pincode = this.formData.pincode;
                     setTimeout(() => {
                         this.message = '';
-                         this.$router.push("/user/profile");
+                         this.$router.push("/admin/edit_profile");
                     }, 3000);
                    
                 })
@@ -133,7 +133,7 @@ export default {
                 <Button v-if="!editMode" @click="toggleEdit" label="Edit" radius="10px" />
                 <Button v-else @click="saveProfile" label="Save" radius="10px" />
                 <Button v-if="editMode" @click="toggleEdit" label="Cancel" radius="10px" />
-                <router-link to="/user/dashboard">
+                <router-link to="/admin/dashboard">
                     <Button label="Back" radius="10px" />
                 </router-link>
             </div>

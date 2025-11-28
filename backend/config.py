@@ -17,3 +17,7 @@ class Localconfig(Config):
   SECURITY_API_ENABLED_METHODS = ["login"]
   HOST = '0.0.0.0'  # Allow external connections
   PORT = 5000    
+  CACHE_TYPE = "RedisCache"
+  CACHE_REDIS_URL = "redis://localhost:6379/0"
+  CACHE_DEFAULT_TIMEOUT = 60
+  

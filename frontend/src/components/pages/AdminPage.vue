@@ -22,7 +22,7 @@ export default {
       }
     },
     del(lot_id) {
-      fetch(`http://localhost:5000/api/admin/delete_lot/${lot_id}`, {
+      fetch(`http://127.0.0.1:5000/api/admin/delete_lot/${lot_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -31,6 +31,14 @@ export default {
       })
         .then(res => res.json())
         .then(data => {
+          if (data.message === "Cannot delete lot with occupied spots") {
+            this.message = data.message;
+            this.messageType = 'danger';
+            setTimeout(() => {
+              this.message = '';
+            }, 2000);
+            return;
+          }
           this.message = data.message;
           this.messageType = 'success';
           this.created_lots = this.created_lots.filter(lot => lot.lot_id !== lot_id);
@@ -43,7 +51,7 @@ export default {
     }
   },
   mounted() {
-    fetch("http://localhost:5000/api/auth/admin", {
+    fetch("http://127.0.0.1:5000/api/auth/admin", {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -54,7 +62,7 @@ export default {
       .then(data => {
         this.admindata = data;
 
-        return fetch("http://localhost:5000/api/admin/view_lots", {
+        return fetch("http://127.0.0.1:5000/api/admin/view_lots", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -69,7 +77,7 @@ export default {
           this.created_lots = []; // empty array
           this.message = data.message;
         } else {
-          this.created_lots = data;
+          this.created_lots = [...data];
         }
         this.loading = false;
 
@@ -97,7 +105,7 @@ export default {
 
     <div v-if="loading" class="text-center mt-5">Loading...</div>
     <div v-else class="d-flex flex-wrap gap-3   justify-content-center">
-      <div v-for="(lot, index) in created_lots" :key="index" class="card">
+      <div v-for="lot in created_lots" :key="lot.lot_id" class="card">
         <h5><b>{{ lot.prime_location }}</b> <img @click=" ConfirmDelete(lot.lot_id)" src="@\assets\delete.png"
             class="del-icon" width="25px">
         </h5>
@@ -110,7 +118,7 @@ export default {
         <div class="d-flex  gap-3 justify-content-between mt-2">
           <router-link :to="{ name: 'AdminEditLot', params: { lot_id: lot.lot_id } }"><Button label=" Edit"
               radius="10px" bgcolor="#F97316" hoverColor=" #EA580C" /></router-link>
-          <router-link :to="{ name:'AdminSpotsPage', params: {lot_id: lot.lot_id}  }"><Button label="Spots" radius="10px" hoverColor="#4338CA" bgcolor="#4F46E5" /></router-link>
+          <router-link :to="{ name:'AdminSpotsPage', params: {lot_id: lot.lot_id}  }"><Button label="Spots" height="40px" radius="10px" hoverColor="#4338CA" bgcolor="#4F46E5" /></router-link>
 
         </div>
       </div>
@@ -119,7 +127,7 @@ export default {
   </div>
   <div class="button_container" >
     <div class="add_lot">
-      <router-link to="/admin/add_lot"><Button label="Add lot" radius="10px" padding="5px 10px " width="15rem" fs="35px"
+      <router-link to="/admin/add_lot"><Button label="Add lot" radius="10px" padding="5px 10px " width="15rem" fs="35px" height="60px"
           hoverColor="#008B8B" /></router-link>
     </div>
   </div>
