@@ -264,36 +264,36 @@ def edit_lot():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-
-
+    
+    
+    
 @admin_bp.route('/view_lots',methods=['POST'])
 @auth_required('token')
 @roles_required('admin')
-@cache.cached(timeout=120,key_prefix="view_lots")
+@cache.cached(timeout=60,key_prefix="view_lots") 
 def view_lots():
-    admin_id=request.get_json().get('admin_id')
-    print(admin_id)
-    if not admin_id:
-        return jsonify({"message":"admin_id is required"}),400
-    lots=Parking_lots.query.filter_by(admin_id=admin_id).all()
-    if not lots:
-        return jsonify({"message":"No lot found for this admin "}),404
-   
-    result=[]
-    for lot in lots:
-      spots=db.session.query(func.count(Parking_spot.id)).filter_by(lot_id=lot.id, status='A').scalar()
-      available_spots=spots
-      result.append({
-        "lot_id":lot.id,
-        "prime_location":lot.prime_location,
-        "address":lot.address,
-        "pincode":lot.pincode,
-        "available_spots":available_spots,
-        "total_spaces":lot.max_no_of_spots,
-        "price_per_hour_of_spot":lot.price_per_hour_of_spot
-        })
-    return jsonify(result),200
+    admin_id = request.get_json().get('admin_id')
 
+    if not admin_id:
+        return jsonify({"message":"admin_id is required"}), 400
+
+    lots = Parking_lots.query.filter_by(admin_id=admin_id).all()
+    if not lots:
+        return jsonify({"message":"No lot found for this admin"}), 404
+
+    result = []
+    for lot in lots:
+        result.append({
+            "lot_id": lot.id,
+            "prime_location": lot.prime_location,
+            "address": lot.address,
+            "pincode": lot.pincode,
+            "available_spots": lot.available_spots,   # USE DB VALUE
+            "total_spaces": lot.max_no_of_spots,
+            "price_per_hour_of_spot": lot.price_per_hour_of_spot
+        })
+
+    return jsonify(result), 200
 
 
 
@@ -435,8 +435,7 @@ def search_spot():
 
 @admin_bp.route('/search/user',methods=['POST'])
 @auth_required('token')
-@roles_required('admin') 
-@cache.memoize(timeout=120)   
+@roles_required('admin')    
 def search_user():
     user_id=request.get_json().get('user_id')
     email=request.get_json().get('email')
@@ -446,9 +445,9 @@ def search_user():
       return jsonify({"message": "email or fullname is required"}), 400
     user_json=[]
     if email:
-            results=(db.session.query(User, func.count(Reserve_parking_spot.id).label("reservation_count")
+            results=(db.session.query(User, func.count(Reserve_parking_spot.id).label("reservation_count"))
                                       .outerjoin(Reserve_parking_spot,Reserve_parking_spot.user_id==User.id)
-                                      .filter(User.email==email).group_by(User.id).all()))
+                                      .filter(User.email==email).group_by(User.id).all())
             if not results:
                 return jsonify({"message":"No user found for this email"}),404
             for user,reservations in results:
@@ -561,6 +560,7 @@ def delete_lot(lot_id):
     try:
         db.session.delete(lot)
         db.session.commit()
+        cache.delete("view_lots")
         return jsonify({"message":"Lot deleted successfully"}),200
     except Exception as e:
         db.session.rollback()
@@ -629,7 +629,7 @@ def unban_user():
 @admin_bp.route('/summary', methods=['GET'])
 @auth_required('token')
 @roles_required('admin')
-@cache.cached(timeout=30)
+@cache.cached(timeout=10)
 def summary():
     admin_id = current_user.id
 

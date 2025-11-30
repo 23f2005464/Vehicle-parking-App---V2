@@ -8,6 +8,7 @@ class Localconfig(Config):
 
   #security config 
   SECRET_KEY = 'local_dev'
+ 
   SECURITY_PASSWORD_HASH = 'bcrypt'
   SECURITY_PASSWORD_SALT = 'saltmixer'
   WTF_CSRF_ENABLED = False

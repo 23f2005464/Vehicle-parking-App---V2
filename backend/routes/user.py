@@ -16,6 +16,8 @@ def get_ist_now(time):
     return parking_t.replace(tzinfo=None).replace(microsecond=0)
 
 
+def ist_to_utc_naive(dt):
+    return dt - timedelta(hours=5, minutes=30)
 
 
 @user_bp.route('/update_profile',methods=['PUT'])
@@ -105,10 +107,9 @@ def get_issuing_spot():
         }
     }), 200
 
-
-@user_bp.route('/issuing_spot',methods=['POST'])
+@user_bp.route('/issuing_spot', methods=['POST'])
 @auth_required('token')
-@roles_required('user') 
+@roles_required('user')
 def issuing_spot():
     booking_data = request.get_json()
     lot_id = booking_data.get('lot_id')
@@ -117,33 +118,50 @@ def issuing_spot():
     if not lot_id or not vehicle_number:
         return jsonify({"message": "lot_id and vehicle_number are required"}), 400
 
-    spot = Parking_spot.query.filter_by(lot_id=lot_id, status='A').first()
-    if not spot:
-        return jsonify({"message": "spots not available"}), 404
-
-    issuing_spot_id = spot.id
-    issue_spot_data = Reserve_parking_spot(
-        user_id=current_user.id,
-        spot_id=issuing_spot_id,
-        parking_timestamp=func.now(),
-        vehicle_number=vehicle_number
-    )
-    spot.status = 'R'
-
     try:
-        db.session.add(issue_spot_data)
+        # FIND LOT AND LOCK IT (PREVENT DOUBLE BOOKING)
+        lot = Parking_lots.query.filter_by(id=lot_id).with_for_update().first()
+        if not lot:
+            return jsonify({"message": "Lot not found"}), 404
+
+        # NO AVAILABLE SPOTS
+        if lot.available_spots <= 0:
+            return jsonify({"message": "spots not available"}), 404
+
+        # FIND ONE FREE SPOT
+        spot = Parking_spot.query.filter_by(lot_id=lot_id, status='A').with_for_update().first()
+        if not spot:
+            return jsonify({"message": "spots not available"}), 404
+
+        # MARK SPOT RESERVED
+        spot.status = 'R'
+
+        # UPDATE AVAILABLE SPOTS
+        lot.available_spots -= 1
+
+        # CREATE RESERVATION ENTRY
+        reservation = Reserve_parking_spot(
+            user_id=current_user.id,
+            spot_id=spot.id,
+            parking_timestamp=func.now(),
+            vehicle_number=vehicle_number
+        )
+
+        db.session.add(reservation)
+
+        # COMMIT EVERYTHING TOGETHER
         db.session.commit()
-        cache.delete("view_lots")#-------------------------------------------------------------------------------------------------------------
+
+        cache.delete("view_lots")
+
         return jsonify({
             "message": "Spot reserved successfully",
-            "reservation_details": {
-                "reservation_id": issue_spot_data.id,
-                "spot_id": issuing_spot_id,
-                "lot_id": lot_id,
-                "vehicle_number": vehicle_number,
-                "parking_timestamp": issue_spot_data.parking_timestamp
-            }
+            "reservation_id": reservation.id,
+            "spot_id": spot.id,
+            "lot_id": lot_id,
+            "vehicle_number": vehicle_number
         }), 201
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -215,11 +233,6 @@ def pay_now():
              hour= (end_time - start_time).total_seconds() / 3600
              nearest_int=paying_hrs(hour)
              return  nearest_int# minutes
-    
-           
-    def get_ist_now(time):
-        parking_t= time + timedelta(hours=5, minutes=30)
-        return parking_t.replace(tzinfo=None).replace(microsecond=0)
   
 
     if request.method=='POST':
@@ -263,7 +276,8 @@ def paying_transaction():
     duration=data['duration']
  
     try:
-            end_parking_timestamp = datetime.fromisoformat(parking_end)
+            parking_end_obj = datetime.fromisoformat(parking_end)
+            end_parking_timestamp = ist_to_utc_naive(parking_end_obj)
     except ValueError:
             return jsonify({"error": "Invalid datetime format for 'parking_end'"}), 400
     
@@ -354,6 +368,8 @@ def user_summary():
         {"prime_location": loc, "total_duration": total}
         for loc, total in aggregated_durations.items()
     ]
+    if data==[]:
+        return jsonify({"message":"No active Reservations So Please Book Spots "})
 
     response = {
         "data": data,

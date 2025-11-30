@@ -41,6 +41,7 @@ def user_home():
     print("user home accessed")
     user=current_user
     return {
+        "user_id":user.id,
         "email":user.email,
         "fullname":user.fullname,   
         "address":user.address,
