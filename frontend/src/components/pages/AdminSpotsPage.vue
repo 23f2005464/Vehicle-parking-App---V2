@@ -67,7 +67,7 @@ export default {
 
         },
         Userdata(spot_id) {
-            fetch("http://127.0.0.1:5000/api/admin/view_spot", {
+            fetch(`${this.$apiBase}/api/admin/view_spot`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ export default {
 
     mounted() {
         this.lot_id = this.$route.params.lot_id
-        fetch(`http://127.0.0.1:5000/api/admin/view_spots`, {
+        fetch(`${this.$apiBase}/api/admin/view_spots`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -293,4 +293,5 @@ export default {
 .close-btn:hover {
     background: #e60000;
 }
+
 </style>
