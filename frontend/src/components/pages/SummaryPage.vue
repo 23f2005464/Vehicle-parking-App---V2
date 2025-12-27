@@ -19,7 +19,7 @@ export default {
     mounted() {
         const token = localStorage.getItem("auth_token");
 
-        fetch("http://127.0.0.1:5000/api/user/user_summary", {
+        fetch(`${this.$apiBase}/api/user/user_summary`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -188,3 +188,4 @@ export default {
     margin: 4rem auto;
 }
 </style>
+
