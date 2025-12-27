@@ -20,7 +20,7 @@ export default {
     },
 
     mounted() {
-        fetch('http://127.0.0.1:5000/api/auth/profile', {
+        fetch(`${this.$apiBase}/api/auth/profile`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export default {
         },
 
         saveProfile() {
-            fetch("http://127.0.0.1:5000/api/user/update_profile", {
+            fetch(`${this.$apiBase}/api/user/update_profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -203,3 +203,4 @@ export default {
     color: #155724;
 }
 </style>
+
