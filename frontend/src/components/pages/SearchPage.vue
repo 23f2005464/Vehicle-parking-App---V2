@@ -3,18 +3,18 @@ import Button from '@/components/ui/NavButton.vue'
 
 const SEARCH_MAP = {
     "Parking Lots": {
-        "pincode": { url: "http://127.0.0.1:5000/api/admin/search/lot", key: "pincode" },
-        "lot id": { url: "http://127.0.0.1:5000/api/admin/search/lot", key: "lot_id" },
-        "name": { url: "http://127.0.0.1:5000/api/admin/search/lot", key: "prime_location" }
+        "pincode": { url: `${this.$apiBase}/api/admin/search/lot`, key: "pincode" },
+        "lot id": { url: `${this.$apiBase}/api/admin/search/lot`, key: "lot_id" },
+        "name": { url: `${this.$apiBase}/api/admin/search/lot`, key: "prime_location" }
     },
     "Parking Spots": {
-        "spot id": { url: "http://127.0.0.1:5000/api/admin/search/spot", key: "spot_id" },
-        "lot id": { url: "http://127.0.0.1:5000/api/admin/search/spot", key: "lot_id" }
+        "spot id": { url: `${this.$apiBase}/api/admin/search/spot`, key: "spot_id" },
+        "lot id": { url: `${this.$apiBase}/api/admin/search/spot`, key: "lot_id" }
     },
     "User": {
-        "user id": { url: "http://127.0.0.1:5000/api/admin/search/user", key: "user_id" },
-        "user name": { url: "http://127.0.0.1:5000/api/admin/search/user", key: "name" },
-        "email": { url: "http://127.0.0.1:5000/api/admin/search/user", key: "email" },
+        "user id": { url: `${this.$apiBase}/api/admin/search/user`, key: "user_id" },
+        "user name": { url: `${this.$apiBase}/api/admin/search/user`, key: "name" },
+        "email": { url: `${this.$apiBase}/api/admin/search/user`, key: "email" },
     }
 };
 
@@ -411,4 +411,5 @@ select {
     text-align: center;
     font-weight: 700;
 }
+
 </style>
