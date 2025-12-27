@@ -20,7 +20,7 @@ export default {
     methods: {
         // Fetch summary from backend
         fetchSummary() {
-            fetch("http://127.0.0.1:5000/api/admin/summary", {
+            fetch(`${this.$apiBase}/api/admin/summary`, {
                 headers: {
                     "Token-Auth": localStorage.getItem("auth_token")
                 }
@@ -206,3 +206,4 @@ export default {
     height: 70% !important;
 }
 </style>
+
