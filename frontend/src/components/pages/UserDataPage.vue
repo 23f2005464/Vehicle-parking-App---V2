@@ -20,7 +20,7 @@ export default {
 
             const token = localStorage.getItem("auth_token");
 
-            fetch("http://127.0.0.1:5000/api/celery/admin/download_all_reservations", {
+            fetch(`${this.$apiBase}/api/celery/admin/download_all_reservations`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export default {
 
                     const interval = setInterval(() => {
 
-                        fetch("http://127.0.0.1:5000/api/celery/admin/user_get_data/" + taskId, {
+                        fetch(`${this.$apiBase}/api/celery/admin/user_get_data/` + taskId, {
                             method: "GET",
                             headers: {
                                 "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export default {
                    
                                 if (status.status === "ready") {
                                     const url =
-                                        "http://127.0.0.1:5000/api/celery/admin_user_download_csv?token=" +
+                                        `${this.$apiBase}/api/celery/admin_user_download_csv?token=` +
                                         status.token;
 
                                     console.log("Admin Downloading:", url);
@@ -80,7 +80,7 @@ export default {
         }
         ,
         fetchUserData() {
-            fetch("http://127.0.0.1:5000/api/admin/view_users", {
+            fetch(`${this.$apiBase}/api/admin/view_users`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ export default {
         }
         ,
         UnBanUser(user_id) {
-            fetch(`http://127.0.0.1:5000/api/admin/unban_user`, {
+            fetch(`${this.$apiBase}/api/admin/unban_user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ export default {
                 })
         },
         BanUser(user_id) {
-            fetch(`http://127.0.0.1:5000/api/admin/ban_user`, {
+            fetch(`${this.$apiBase}/api/admin/ban_user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -202,4 +202,5 @@ export default {
 .container h4{
     font-weight: bold;
 }
+
 </style>
