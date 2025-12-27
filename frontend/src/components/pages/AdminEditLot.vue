@@ -26,7 +26,7 @@ export default {
         View_lot() {
             const lot_id = this.$route.params.lot_id;
 
-            fetch("http://127.0.0.1:5000/api/admin/view_lot", {
+            fetch(`${this.$apiBase}/api/admin/view_lot`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -167,3 +167,4 @@ export default {
     justify-content: center;
 }
 </style>
+
