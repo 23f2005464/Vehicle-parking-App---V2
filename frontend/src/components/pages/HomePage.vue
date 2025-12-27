@@ -22,7 +22,7 @@
             const token = localStorage.getItem("auth_token");
 
             // STEP 1 — Start Celery Invoice Task
-            fetch(`http://127.0.0.1:5000/api/celery/invoice/${reservationId}`, {
+            fetch(`${this.$apiBase}/api/celery/invoice/${reservationId}`, {
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
@@ -36,7 +36,7 @@
 
                 // STEP 2 — Poll Celery Status
                 const interval = setInterval(() => {
-                  fetch(`http://127.0.0.1:5000/api/celery/get_data_invoice/${taskId}`, {
+                  fetch(`${this.$apiBase}/api/celery/get_data_invoice/${taskId}`, {
                     method: "GET",
                     headers: {
                       "Content-Type": "application/json",
@@ -59,7 +59,7 @@
                       // INVOICE READY -> status.token contains the signed token
                       if (PollData.status === "ready") {
                         const url =
-                          "http://127.0.0.1:5000/api/celery/download_invoice?token=" + PollData.token;
+                          `${this.$apiBase}/api/celery/download_invoice?token=` + PollData.token;
 
                         console.log("Downloading invoice:", url);
 
@@ -84,7 +84,7 @@
             const userId = this.userdata.user_id;
 
             // STEP 1 — Start Celery CSV task
-            fetch("http://127.0.0.1:5000/api/celery/user_create_csv/" + userId, {
+            fetch(`${this.$apiBase}/api/celery/user_create_csv/` + userId, {
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
@@ -99,7 +99,7 @@
                 // STEP 2 — Poll Celery status
                 const interval = setInterval(() => {
 
-                  fetch("http://127.0.0.1:5000/api/celery/get_data/" + taskId, {
+                  fetch(`${this.$apiBase}/api/celery/get_data/` + taskId, {
                     method: "GET",
                     headers: {
                       "Content-Type": "application/json",
@@ -124,7 +124,7 @@
                       // Ready → download file
                       if (status.status === "ready") {
                         const url =
-                          "http://127.0.0.1:5000/api/celery/download_csv?token=" + status.token;
+                          `${this.$apiBase}/api/celery/download_csv?token=` + status.token;
 
                         console.log("Downloading:", url);
 
@@ -150,7 +150,7 @@
           handleSearch() {
             this.searchNotHide = true;
             this.search_error = ''; // clear previous error
-            fetch("http://127.0.0.1:5000/api/user/searching_lots", {
+            fetch(`${this.$apiBase}/api/user/searching_lots`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -181,7 +181,7 @@
         mounted() {
           const token = localStorage.getItem('auth_token');
 
-          const userFetch = fetch("http://127.0.0.1:5000/api/auth/user", {
+          const userFetch = fetch(`${this.$apiBase}/api/auth/user`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -189,7 +189,7 @@
             }
           }).then(res => res.json());
 
-          const historyFetch = fetch("http://127.0.0.1:5000/api/user/my_reservations", {
+          const historyFetch = fetch(`${this.$apiBase}/api/user/my_reservations`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -215,7 +215,7 @@
               this.DownloadButton = anyPaid;
 
 
-              return fetch("http://127.0.0.1:5000/api/user/searching_lots", {
+              return fetch(`${this.$apiBase}/api/user/searching_lots`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -416,4 +416,5 @@
 .search-card {
   justify-content: space-around;
 }
+
 </style>
