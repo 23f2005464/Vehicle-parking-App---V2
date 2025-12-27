@@ -59,7 +59,7 @@ export default {
             // Always include lot_id
             editedData.lot_id = this.FormData.lot_id;
 
-            fetch("http://127.0.0.1:5000/api/admin/edit_lot", {
+            fetch(`${this.$apiBase}/api/admin/edit_lot`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -167,4 +167,5 @@ export default {
     justify-content: center;
 }
 </style>
+
 
