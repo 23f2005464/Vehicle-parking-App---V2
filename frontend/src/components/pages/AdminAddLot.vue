@@ -23,7 +23,7 @@ export default {
         Add_lot() {
             if (this.loading) return;
             this.loading = true;
-            fetch('http://127.0.0.1:5000/api/admin/create_lot', {
+            fetch(`${this.$apiBase}/api/admin/create_lot`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,4 +129,5 @@ export default {
     flex-direction: row;
     justify-content: center;
 }
+
 </style>
