@@ -1,5 +1,6 @@
 <script>
 import { Chart } from "chart.js/auto";
+import { API_BASE } from "@/api";
 export default {
     name: "AdminDashboard",
 
@@ -20,7 +21,7 @@ export default {
     methods: {
         // Fetch summary from backend
         fetchSummary() {
-            fetch(`${this.$apiBase}/api/admin/summary`, {
+            fetch(`${API_BASE}/api/admin/summary`, {
                 headers: {
                     "Token-Auth": localStorage.getItem("auth_token")
                 }

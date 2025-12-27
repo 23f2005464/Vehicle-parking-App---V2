@@ -1,6 +1,6 @@
 <script>
 import Button from '@/components/ui/NavButton.vue'
-
+import { API_BASE } from "@/api";
 export default {
     name: 'ProfilePage',
     components: { Button },
@@ -20,7 +20,7 @@ export default {
     },
 
     mounted() {
-        fetch(`${this.$apiBase}/api/auth/profile`, {
+        fetch(`${API_BASE}/api/auth/profile`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export default {
         },
 
         saveProfile() {
-            fetch(`${this.$apiBase}/api/admin/update_profile`, {
+            fetch(`${API_BASE}/api/admin/update_profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

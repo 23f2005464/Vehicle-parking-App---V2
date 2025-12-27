@@ -1,5 +1,6 @@
 <script>
 import Button from '@/components/ui/NavButton.vue';
+import { API_BASE } from "@/api";
 export default {
     name: "UserDataPage",
     components: {
@@ -20,7 +21,7 @@ export default {
 
             const token = localStorage.getItem("auth_token");
 
-            fetch(`${this.$apiBase}/api/celery/admin/download_all_reservations`, {
+            fetch(`${API_BASE}/api/celery/admin/download_all_reservations`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -34,7 +35,7 @@ export default {
 
                     const interval = setInterval(() => {
 
-                        fetch(`${this.$apiBase}/api/celery/admin/user_get_data/` + taskId, {
+                        fetch(`${API_BASE}/api/celery/admin/user_get_data/` + taskId, {
                             method: "GET",
                             headers: {
                                 "Content-Type": "application/json",
@@ -58,7 +59,7 @@ export default {
                    
                                 if (status.status === "ready") {
                                     const url =
-                                        `${this.$apiBase}/api/celery/admin_user_download_csv?token=` +
+                                        `${API_BASE}/api/celery/admin_user_download_csv?token=` +
                                         status.token;
 
                                     console.log("Admin Downloading:", url);
@@ -80,7 +81,7 @@ export default {
         }
         ,
         fetchUserData() {
-            fetch(`${this.$apiBase}/api/admin/view_users`, {
+            fetch(`${API_BASE}/api/admin/view_users`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,7 +100,7 @@ export default {
         }
         ,
         UnBanUser(user_id) {
-            fetch(`${this.$apiBase}/api/admin/unban_user`, {
+            fetch(`${API_BASE}/api/admin/unban_user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,7 +121,7 @@ export default {
                 })
         },
         BanUser(user_id) {
-            fetch(`${this.$apiBase}/api/admin/ban_user`, {
+            fetch(`${API_BASE}/api/admin/ban_user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

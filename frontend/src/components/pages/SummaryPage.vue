@@ -1,6 +1,7 @@
 
 
 <script>
+import { API_BASE } from "@/api";    
 import { Chart } from "chart.js/auto";
 
 export default {
@@ -19,7 +20,7 @@ export default {
     mounted() {
         const token = localStorage.getItem("auth_token");
 
-        fetch(`${this.$apiBase}/api/user/user_summary`, {
+        fetch(`${API_BASE}/api/user/user_summary`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

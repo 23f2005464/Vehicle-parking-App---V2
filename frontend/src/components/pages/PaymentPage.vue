@@ -1,4 +1,5 @@
 <script>import Button from '@/components/ui/NavButton.vue'
+import { API_BASE } from "@/api";
 export default {
   name: 'PaymentPage',
   components: {
@@ -14,7 +15,7 @@ export default {
   },
   methods: {
     Payfunction() {
-      fetch(`${this.$apiBase}/api/user/paying_transaction`, {
+      fetch(`${API_BASE}/api/user/paying_transaction`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,7 +50,7 @@ export default {
     }
   },
   mounted() {
-    fetch(`${this.$apiBase}/api/user/pay_now`, {
+    fetch(`${API_BASE}/api/user/pay_now`, {
       method: 'POST',
 
       headers: {

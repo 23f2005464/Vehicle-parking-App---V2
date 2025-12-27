@@ -1,4 +1,5 @@
 <script >
+import { API_BASE } from "@/api";
 export default {
   name: 'SignupPage',
   data(){
@@ -17,7 +18,7 @@ export default {
             return
         }
         console.log("User is :",this.email,this.fullname)
-        fetch(`${this.$apiBase}/api/auth/register`,{
+        fetch(`${API_BASE}/api/auth/register`,{
             method : 'POST',
             headers :  {
           'Content-Type': 'application/json'

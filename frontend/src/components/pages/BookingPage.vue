@@ -1,6 +1,6 @@
 <script>
 import Button from '@/components/ui/NavButton.vue'
-
+import { API_BASE } from "@/api";
 export default {
   name: 'BookingPage',
   components: { Button },
@@ -18,7 +18,7 @@ export default {
     const lot_id = this.$route.params.lot_id;
 
     // Fetch preview info for available spot
-    fetch(`${this.$apiBase}/api/user/issuing_spot/preview`, {
+    fetch(`${API_BASE}/api/user/issuing_spot/preview`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export default {
         return;
       }
 
-      fetch(`${this.$apiBase}/api/user/issuing_spot`, {
+      fetch(`${API_BASE}/api/user/issuing_spot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

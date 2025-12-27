@@ -1,5 +1,6 @@
 <script>
 import Button from '@/components/ui/NavButton.vue'
+import { API_BASE } from "@/api";
 export default {
     name: 'AdminAddLot',
     components: {
@@ -23,7 +24,7 @@ export default {
         Add_lot() {
             if (this.loading) return;
             this.loading = true;
-            fetch(`${this.$apiBase}/api/admin/create_lot`, {
+            fetch(`${API_BASE}/api/admin/create_lot`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,5 +1,6 @@
 <script>
 import Button from '@/components/ui/NavButton.vue'
+import { API_BASE } from "@/api";
 export default {
     name: "AdminSpotsPage",
     components: {
@@ -67,7 +68,7 @@ export default {
 
         },
         Userdata(spot_id) {
-            fetch(`${this.$apiBase}/api/admin/view_spot`, {
+            fetch(`${API_BASE}/api/admin/view_spot`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ export default {
 
     mounted() {
         this.lot_id = this.$route.params.lot_id
-        fetch(`${this.$apiBase}/api/admin/view_spots`, {
+        fetch(`${API_BASE}/api/admin/view_spots`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,20 +1,20 @@
 <script>
 import Button from '@/components/ui/NavButton.vue'
-
+import { API_BASE } from "@/api";
 const SEARCH_MAP = {
     "Parking Lots": {
-        "pincode": { url: `${this.$apiBase}/api/admin/search/lot`, key: "pincode" },
-        "lot id": { url: `${this.$apiBase}/api/admin/search/lot`, key: "lot_id" },
-        "name": { url: `${this.$apiBase}/api/admin/search/lot`, key: "prime_location" }
+        "pincode": { url: `${API_BASE}/api/admin/search/lot`, key: "pincode" },
+        "lot id": { url: `${API_BASE}/api/admin/search/lot`, key: "lot_id" },
+        "name": { url: `${API_BASE}/api/admin/search/lot`, key: "prime_location" }
     },
     "Parking Spots": {
-        "spot id": { url: `${this.$apiBase}/api/admin/search/spot`, key: "spot_id" },
-        "lot id": { url: `${this.$apiBase}/api/admin/search/spot`, key: "lot_id" }
+        "spot id": { url: `${API_BASE}/api/admin/search/spot`, key: "spot_id" },
+        "lot id": { url: `${API_BASE}/api/admin/search/spot`, key: "lot_id" }
     },
     "User": {
-        "user id": { url: `${this.$apiBase}/api/admin/search/user`, key: "user_id" },
-        "user name": { url: `${this.$apiBase}/api/admin/search/user`, key: "name" },
-        "email": { url: `${this.$apiBase}/api/admin/search/user`, key: "email" },
+        "user id": { url: `${API_BASE}/api/admin/search/user`, key: "user_id" },
+        "user name": { url: `${API_BASE}/api/admin/search/user`, key: "name" },
+        "email": { url: `${API_BASE}/api/admin/search/user`, key: "email" },
     }
 };
 
@@ -114,7 +114,7 @@ export default {
         }
         ,
         ReservationInfo(user_id) {
-            fetch(`${this.$apiBase}/api/admin/search/view_user_res_info`, {
+            fetch(`${API_BASE}/api/admin/search/view_user_res_info`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

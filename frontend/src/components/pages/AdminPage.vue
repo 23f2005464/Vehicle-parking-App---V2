@@ -1,6 +1,7 @@
 <script>
 import Button from '@/components/ui/NavButton.vue'
 import { routeLocationKey } from 'vue-router';
+import { API_BASE } from "@/api";
 export default {
   name: 'ParkingLotsPage',
   components: {
@@ -22,7 +23,7 @@ export default {
       }
     },
     del(lot_id) {
-      fetch(`${this.$apiBase}/api/admin/delete_lot/${lot_id}`, {
+      fetch(`${API_BASE}/api/admin/delete_lot/${lot_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +52,7 @@ export default {
     }
   },
   mounted() {
-    fetch(`${this.$apiBase}/api/auth/admin`, {
+    fetch(`${API_BASE}/api/auth/admin`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +63,7 @@ export default {
       .then(data => {
         this.admindata = data;
 
-        return fetch(`${this.$apiBase}/api/admin/view_lots`, {
+        return fetch(`${API_BASE}/api/admin/view_lots`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

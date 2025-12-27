@@ -6,7 +6,6 @@ import router from './router'
 
 const app = createApp(App)
 
-app.config.globalProperties.$apiBase = import.meta.env.VITE_API_BASE_URL
 app.use(createPinia())
 app.use(router)
 

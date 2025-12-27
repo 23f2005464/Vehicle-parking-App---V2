@@ -1,6 +1,6 @@
 <script>
 import Button from '@/components/ui/NavButton.vue'
-
+import { API_BASE } from "@/api";
 export default {
     name: "AdminEditLot",
     components: { Button },
@@ -26,7 +26,7 @@ export default {
         View_lot() {
             const lot_id = this.$route.params.lot_id;
 
-            fetch(`${this.$apiBase}/api/admin/view_lot`, {
+            fetch(`${API_BASE}/api/admin/view_lot`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -59,7 +59,7 @@ export default {
             // Always include lot_id
             editedData.lot_id = this.FormData.lot_id;
 
-            fetch(`${this.$apiBase}/api/admin/edit_lot`, {
+            fetch(`${API_BASE}/api/admin/edit_lot`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

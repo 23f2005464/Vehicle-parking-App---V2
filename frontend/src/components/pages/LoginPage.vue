@@ -1,4 +1,5 @@
 <script>
+import { API_BASE } from "@/api";
 export default {
   name: 'LoginPage',
   data() {
@@ -22,7 +23,7 @@ export default {
         return;
       }
       console.log("Logging in with", this.FormData.email, this.FormData.password)
-      fetch(`${this.$apiBase}/api/auth/login`, {
+      fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
