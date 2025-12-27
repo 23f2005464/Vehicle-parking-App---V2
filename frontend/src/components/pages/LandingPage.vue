@@ -1,13 +1,13 @@
 <script>
+import parkingImg from "@/assets/parking.jpg";
+import manImg from "@/assets/man.jpg";
+import tripImg from "@/assets/trip.webp";
+
 export default {
   name: "LandingPage",
   data() {
     return {
-      images: [
-        "/src/assets/parking.jpg",
-        "/src/assets/man.jpg",
-        "/src/assets/trip.webp"
-      ],
+      images: [parkingImg, manImg, tripImg],
       index: 0
     };
   },
