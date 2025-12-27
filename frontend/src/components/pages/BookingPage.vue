@@ -18,7 +18,7 @@ export default {
     const lot_id = this.$route.params.lot_id;
 
     // Fetch preview info for available spot
-    fetch('http://127.0.0.1:5000/api/user/issuing_spot/preview', {
+    fetch(`${this.$apiBase}/api/user/issuing_spot/preview`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export default {
         return;
       }
 
-      fetch('http://127.0.0.1:5000/api/user/issuing_spot', {
+      fetch(`${this.$apiBase}/api/user/issuing_spot`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -178,3 +178,4 @@ export default {
   color: #155724;
 }
 </style>
+
