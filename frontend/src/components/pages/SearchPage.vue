@@ -114,7 +114,7 @@ export default {
         }
         ,
         ReservationInfo(user_id) {
-            fetch("http://127.0.0.1:5000/api/admin/search/view_user_res_info", {
+            fetch(`${this.$apiBase}/api/admin/search/view_user_res_info`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -413,3 +413,4 @@ select {
 }
 
 </style>
+
