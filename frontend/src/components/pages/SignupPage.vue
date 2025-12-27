@@ -17,7 +17,7 @@ export default {
             return
         }
         console.log("User is :",this.email,this.fullname)
-        fetch('http://127.0.0.1:5000/api/auth/register',{
+        fetch(`${this.$apiBase}/api/auth/register`,{
             method : 'POST',
             headers :  {
           'Content-Type': 'application/json'
@@ -142,3 +142,4 @@ a:hover {
   text-decoration: underline;
 }
 </style>
+
