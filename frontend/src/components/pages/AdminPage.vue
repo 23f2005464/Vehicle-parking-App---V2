@@ -22,7 +22,7 @@ export default {
       }
     },
     del(lot_id) {
-      fetch(`http://127.0.0.1:5000/api/admin/delete_lot/${lot_id}`, {
+      fetch(`${this.$apiBase}/api/admin/delete_lot/${lot_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ export default {
     }
   },
   mounted() {
-    fetch("http://127.0.0.1:5000/api/auth/admin", {
+    fetch(`${this.$apiBase}/api/auth/admin`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export default {
       .then(data => {
         this.admindata = data;
 
-        return fetch("http://127.0.0.1:5000/api/admin/view_lots", {
+        return fetch(`${this.$apiBase}/api/admin/view_lots`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -199,3 +199,4 @@ export default {
   justify-content: center;
 }
 </style>
+
