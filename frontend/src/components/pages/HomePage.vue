@@ -425,8 +425,8 @@
 }
 .homeimage {
   width: 100%;
-  max-width: 600px;
-  height: 400px;
+  max-width: 1200px;
+  height: 800px;
   overflow: hidden;
   border-radius: 10px;
   display: flex;
@@ -439,7 +439,7 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-  
+
 }
 
 </style>
