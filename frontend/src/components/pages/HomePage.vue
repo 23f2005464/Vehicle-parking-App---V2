@@ -266,11 +266,7 @@
           </div>
 
           <div class="container card-container">
-           <div v-if="searchResults.length === 0" class="homeimage">
-           <img :src="userHomepageImg" alt="No results" >
-           <h3> Type Pincode 394107 for testing </h3>
-           </div>
-            <div v-for="(lot, index) in searchResults" :key="index">
+           <div v-for="(lot, index) in searchResults" :key="index">
               <div class="card" style="width: 18rem;">
                 <div class="card-body search-card">
                   <h5 class="card-title">
@@ -294,6 +290,11 @@
                 </div>
               </div>
             </div>
+           <div v-if="searchResults.length === 0" class="homeimage">
+           <img :src="userHomepageImg" alt="No results" >
+           <h3> Type Pincode 394107 for testing </h3>
+           </div>
+           
           </div>
 
           <div class="history-header">
