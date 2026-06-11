@@ -445,7 +445,7 @@
 
 .homeimage h3 {
   position: absolute;
-  bottom: 20px;
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
   color: white;
