@@ -427,7 +427,7 @@
 .homeimage {
   width: 100%;
   max-width: 1200px;
-  height: 800px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: 10px;
   display: flex;
@@ -437,6 +437,7 @@
 }
 
 .homeimage img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
