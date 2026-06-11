@@ -433,6 +433,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .homeimage img {
@@ -440,7 +441,15 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+}
 
+.homeimage h3 {
+  position: absolute;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 10;
 }
 
 </style>
