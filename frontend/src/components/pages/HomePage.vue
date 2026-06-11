@@ -445,11 +445,15 @@
 
 .homeimage h3 {
   position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   color: white;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   padding: 10px 20px;
   border-radius: 5px;
   z-index: 10;
+  margin: 0;
 }
 
 </style>
