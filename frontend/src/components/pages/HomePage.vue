@@ -266,8 +266,8 @@
           </div>
 
           <div class="container card-container">
-           <div v-if="searchResults.length === 0">
-           <img :src="userHomepageImg" alt="No results">
+           <div v-if="searchResults.length === 0" class="homeimage">
+           <img :src="userHomepageImg" alt="No results" >
            </div>
             <div v-for="(lot, index) in searchResults" :key="index">
               <div class="card" style="width: 18rem;">
@@ -385,6 +385,7 @@
   margin-right: 1rem;
 }
 
+
 .card-container {
   display: flex;
   flex-direction: row;
@@ -421,6 +422,24 @@
 
 .search-card {
   justify-content: space-around;
+}
+.homeimage {
+  width: 100%;
+  max-width: 600px;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.homeimage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  
 }
 
 </style>
