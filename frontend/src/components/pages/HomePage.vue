@@ -268,6 +268,7 @@
           <div class="container card-container">
            <div v-if="searchResults.length === 0" class="homeimage">
            <img :src="userHomepageImg" alt="No results" >
+           <h3> Type Pincode 394107 for testing </h3>
            </div>
             <div v-for="(lot, index) in searchResults" :key="index">
               <div class="card" style="width: 18rem;">
