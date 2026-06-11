@@ -264,6 +264,8 @@
           </div>
 
           <div class="container card-container">
+           <div v-if="len(searchResults)==0">
+           <img src="frontend/src/assets/Userhomepage.png">
             <div v-for="(lot, index) in searchResults" :key="index">
               <div class="card" style="width: 18rem;">
                 <div class="card-body search-card">
