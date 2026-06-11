@@ -1,6 +1,7 @@
       <script>
       import Button from '@/components/ui/NavButton.vue'
       import { API_BASE } from "@/api";
+      import userHomepageImg from '@/assets/Userhomepage.png';
       export default {
         name: 'HomePage',
         components: {
@@ -13,7 +14,8 @@
             searchResults: [],
             query: '',
             search_error: '',
-            DownloadButton: true
+            DownloadButton: true,
+            userHomepageImg: userHomepageImg
           }
         },
         methods: {
@@ -265,7 +267,7 @@
 
           <div class="container card-container">
            <div v-if="searchResults.length === 0">
-           <img src="frontend/src/assets/Userhomepage.png">
+           <img :src="userHomepageImg" alt="No results">
            </div>
             <div v-for="(lot, index) in searchResults" :key="index">
               <div class="card" style="width: 18rem;">
